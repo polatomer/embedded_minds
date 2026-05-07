@@ -59,6 +59,17 @@ Item {
             cpr.chooseSecondary()
     }
 
+    // ── Sesli komut ──────────────────────────────────────────────────────────
+    function voiceYes() {
+        if (root.showPulseCheckPopup) { onPulsePresent(); return }
+        if (cpr.showDecision) { selectedDecision = 0; cpr.choosePrimary() }
+    }
+    function voiceNo() {
+        if (root.showPulseCheckPopup) { onPulseAbsent(); return }
+        if (cpr.showDecision) { selectedDecision = 1; cpr.chooseSecondary() }
+    }
+
+
     function clearVideoError() {
         showVideoError = false
         videoErrorMessage = ""

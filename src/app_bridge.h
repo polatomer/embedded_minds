@@ -92,7 +92,18 @@ signals:
     void uiEncoderPressed();
     void uiEncoderRotated(int direction);
 
-    // Sesli komut özel sinyalleri — QML tarafından yakalanır
+    // ── Sesli komut sinyalleri — main.qml tarafından yakalanır ───────────────
+
+    // Onay / Ret (popup'larda ve soru ekranında)
+    void voiceYesRequested();
+    void voiceNoRequested();
+
+    // Kanama bölgesi seçimi (QuestionScreen'de q_bleeding_location)
+    void voiceKolRequested();
+    void voiceBacakRequested();
+    void voiceVucutRequested();
+
+    // Özel eylemler
     void voiceAmbulansAraRequested();
     void voiceYardimRequested();
     void voiceVeriKaydiniSilRequested();
@@ -109,8 +120,7 @@ private:
     void updateResultState();
     void openFinalScreen();
     void onSensorChanged();
-
-    int findAnswerIndexById(const std::string& answerId) const;
+    int  findAnswerIndexById(const std::string& answerId) const;
 
     // Gaz monitörü
     void startGasMonitor();
@@ -131,18 +141,14 @@ private:
     void handleEncoderRotate(int direction);
 
 private:
-    // İş mantığı
     Core              core_;
     CprController     cpr_controller_;
     BleedingController bleeding_controller_;
     VitalSignsService vital_signs_;
     Session           session_;
     EventRecorder     event_recorder_;
-
-    // Sesli komut sunucusu
     VoiceCommandServer voice_server_;
 
-    // Durum
     QString screen_         = "home";
     QString language_       = "tr";
     QString media_base_url_;

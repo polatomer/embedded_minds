@@ -68,6 +68,19 @@ Item {
         }
     }
 
+    // ── Sesli komut ──────────────────────────────────────────────────────────
+    function voiceYes() {
+        if (root.showTourniquetPopup) { onTourniquetYes(); return }
+        if (bleeding.showDecision) { selectedOverlayAction = 0; bleeding.choosePrimary(); return }
+        if (bleeding.showMonitor)  { bleeding.restart() }
+    }
+    function voiceNo() {
+        if (root.showTourniquetPopup) { onTourniquetNo(); return }
+        if (bleeding.showDecision) { selectedOverlayAction = 1; bleeding.chooseSecondary(); return }
+        if (bleeding.showMonitor)  { appBridge.goHome() }
+    }
+
+
     function clearVideoError() {
         showVideoError = false
         videoErrorMessage = ""

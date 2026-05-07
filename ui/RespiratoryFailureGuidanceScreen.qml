@@ -24,6 +24,19 @@ Item {
     function handlePhysicalRotate() {}
     function handlePhysicalPress()  {}
 
+    // ── Sesli komut ──────────────────────────────────────────────────────────
+    // showChokingPopup: Evet=back_blows  Hayır=recovery
+    // showBackPopup:    Evet=recovery    Hayır=heimlich
+    function voiceYes() {
+        if (root.showChokingPopup) { root.goPhase("back_blows"); return }
+        if (root.showBackPopup)    { root.goPhase("recovery") }
+    }
+    function voiceNo() {
+        if (root.showChokingPopup) { root.goPhase("recovery"); return }
+        if (root.showBackPopup)    { root.goPhase("heimlich") }
+    }
+
+
     function videoUrl(key) {
         return appBridge.mediaBaseUrl + "/respiratory/" + key + ".mp4"
     }

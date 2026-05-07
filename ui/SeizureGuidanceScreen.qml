@@ -26,6 +26,12 @@ Item {
         if (root.showSeizurePopup) root.goRecovery()
     }
 
+    // ── Sesli komut ──────────────────────────────────────────────────────────
+    // showSeizurePopup: Evet=goRecovery (tek buton)
+    function voiceYes() { if (root.showSeizurePopup) root.goRecovery() }
+    function voiceNo()  {}
+
+
     function videoUrl(key) {
         return appBridge.mediaBaseUrl + "/seizure/" + key + ".mp4"
     }

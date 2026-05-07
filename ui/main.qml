@@ -404,6 +404,41 @@ ApplicationWindow {
             window.routeUiRotate(direction)
         }
 
+        // ── Sesli komut: Evet / Hayır ─────────────────────────────────────────
+        function onVoiceYesRequested() {
+            var s = appBridge.screen
+            if (window.showSensorPlacement || window.showManualMeasurement) return
+            if (s === "cpr")                                                        { cprScreen.voiceYes(); return }
+            if (s === "massive_bleeding" || s === "gd_bleeding_arm_heavy" || s === "bleeding_arm_heavy") { bleedingArmScreen.voiceYes(); return }
+            if (s === "bleeding_leg_heavy"  || s === "gd_bleeding_leg_heavy")      { bleedingLegScreen.voiceYes(); return }
+            if (s === "bleeding_body_heavy" || s === "gd_bleeding_body_heavy"
+             || s === "bleeding_body_light" || s === "gd_bleeding_body_light")     { bleedingBodyScreen.voiceYes(); return }
+            if (s === "bleeding_arm_light"  || s === "gd_bleeding_arm_light")      { bleedingArmLightScreen.voiceYes(); return }
+            if (s === "bleeding_leg_light"  || s === "gd_bleeding_leg_light")      { bleedingLegLightScreen.voiceYes(); return }
+            if (s === "anaphylaxis"         || s === "gd_anaphylaxis")             { anaphylaxisScreen.voiceYes(); return }
+            if (s === "stroke"              || s === "gd_stroke")                  { strokeScreen.voiceYes(); return }
+            if (s === "acute_cardiac_event" || s === "gd_acute_cardiac_event")     { cardiacScreen.voiceYes(); return }
+            if (s === "respiratory_failure" || s === "gd_respiratory_failure" || s === "low_spo2") { respiratoryScreen.voiceYes(); return }
+            if (s === "seizure_emergency"   || s === "gd_seizure_emergency")       { seizureScreen.voiceYes(); return }
+        }
+
+        function onVoiceNoRequested() {
+            var s = appBridge.screen
+            if (window.showSensorPlacement || window.showManualMeasurement) return
+            if (s === "cpr")                                                        { cprScreen.voiceNo(); return }
+            if (s === "massive_bleeding" || s === "gd_bleeding_arm_heavy" || s === "bleeding_arm_heavy") { bleedingArmScreen.voiceNo(); return }
+            if (s === "bleeding_leg_heavy"  || s === "gd_bleeding_leg_heavy")      { bleedingLegScreen.voiceNo(); return }
+            if (s === "bleeding_body_heavy" || s === "gd_bleeding_body_heavy"
+             || s === "bleeding_body_light" || s === "gd_bleeding_body_light")     { bleedingBodyScreen.voiceNo(); return }
+            if (s === "bleeding_arm_light"  || s === "gd_bleeding_arm_light")      { bleedingArmLightScreen.voiceNo(); return }
+            if (s === "bleeding_leg_light"  || s === "gd_bleeding_leg_light")      { bleedingLegLightScreen.voiceNo(); return }
+            if (s === "anaphylaxis"         || s === "gd_anaphylaxis")             { anaphylaxisScreen.voiceNo(); return }
+            if (s === "stroke"              || s === "gd_stroke")                  { strokeScreen.voiceNo(); return }
+            if (s === "acute_cardiac_event" || s === "gd_acute_cardiac_event")     { cardiacScreen.voiceNo(); return }
+            if (s === "respiratory_failure" || s === "gd_respiratory_failure" || s === "low_spo2") { respiratoryScreen.voiceNo(); return }
+            if (s === "seizure_emergency"   || s === "gd_seizure_emergency")       { seizureScreen.voiceNo(); return }
+        }
+
         // ── Sesli komut sinyalleri ────────────────────────────────────────────
 
         function onVoiceAmbulansAraRequested() {
@@ -424,6 +459,41 @@ ApplicationWindow {
                 console.warn("clearAllEvents desteklenmiyor:", e)
             }
         }
+    }
+
+
+    // ── Sesli komut bildirimi (banner) ───────────────────────────────────────
+    Rectangle {
+        id: voiceBanner
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.topMargin: 10
+        width: voiceBannerText.implicitWidth + 36
+        height: 40
+        radius: 10
+        color: "#CC1E3A5F"
+        visible: false
+        z: 999
+
+        Text {
+            id: voiceBannerText
+            anchors.centerIn: parent
+            color: "#FFFFFF"
+            font.pixelSize: 15
+            font.bold: true
+        }
+
+        Timer {
+            id: voiceBannerTimer
+            interval: 1800
+            onTriggered: voiceBanner.visible = false
+        }
+    }
+
+    function showVoiceBanner(text) {
+        voiceBannerText.text = "🎤 " + text
+        voiceBanner.visible = true
+        voiceBannerTimer.restart()
     }
 
     StackLayout {

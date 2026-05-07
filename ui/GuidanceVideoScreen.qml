@@ -46,6 +46,10 @@ Item {
     }
     function handlePhysicalPress() { if (showPopup) chooseOption(selectedOption) }
 
+    // ── Sesli komut ─────────────────────────────────────────────────────────
+    function voiceYes() { if (showPopup) chooseOption(0) }
+    function voiceNo()  { if (showPopup) chooseOption(1) }
+
     function clearVideoError() { showVideoError = false; videoErrorMessage = "" }
 
     function videoUrl(key) {

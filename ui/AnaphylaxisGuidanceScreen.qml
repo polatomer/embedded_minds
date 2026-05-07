@@ -32,6 +32,19 @@ Item {
     function handlePhysicalRotate() {}
     function handlePhysicalPress()  {}
 
+    // ── Sesli komut ──────────────────────────────────────────────────────────
+    // showEpiPopup:       Evet=epi1  Hayır=no_epi_comfort
+    // showRecoveredPopup: Evet=comfort  Hayır=epi2
+    function voiceYes() {
+        if (root.showEpiPopup)       { root.goPhase("epi1"); return }
+        if (root.showRecoveredPopup) { root.goPhase("comfort") }
+    }
+    function voiceNo() {
+        if (root.showEpiPopup)       { root.goPhase("no_epi_comfort"); return }
+        if (root.showRecoveredPopup) { root.goPhase("epi2") }
+    }
+
+
     function videoUrl(key) {
         var base = appBridge.mediaBaseUrl
         if (!base || base === "") return ""
