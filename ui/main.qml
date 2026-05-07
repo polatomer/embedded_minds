@@ -333,6 +333,44 @@ ApplicationWindow {
         }
     }
 
+    // ── Sesli komut bildirimi ─────────────────────────────────────────────────
+    // AKS açıkken bir sesli komut geldiğinde ekranın üst köşesinde kısa süre
+    // görünen şeffaf banner. Kendi kendine kaybolur, dokunuşa gerek yok.
+    Rectangle {
+        id: voiceBanner
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.topMargin: 10
+        width: voiceBannerText.implicitWidth + 32
+        height: 38
+        radius: 10
+        color: "#CC1E3A5F"
+        visible: false
+        z: 999
+
+        Text {
+            id: voiceBannerText
+            anchors.centerIn: parent
+            color: "#FFFFFF"
+            font.pixelSize: 15
+            font.bold: true
+        }
+
+        Timer {
+            id: voiceBannerTimer
+            interval: 1800
+            onTriggered: voiceBanner.visible = false
+        }
+    }
+
+    function showVoiceBanner(text) {
+        voiceBannerText.text = "🎤 " + text
+        voiceBanner.visible = true
+        voiceBannerTimer.restart()
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+
     Connections {
         target: appBridge
 
@@ -364,6 +402,27 @@ ApplicationWindow {
 
         function onUiEncoderRotated(direction) {
             window.routeUiRotate(direction)
+        }
+
+        // ── Sesli komut sinyalleri ────────────────────────────────────────────
+
+        function onVoiceAmbulansAraRequested() {
+            window.showVoiceBanner("Ambulans aranıyor...")
+            Qt.openUrlExternally("tel:112")
+        }
+
+        function onVoiceYardimRequested() {
+            window.showVoiceBanner("Yardım")
+            // İstersen buraya bir yardım dialog'u açabilirsin
+        }
+
+        function onVoiceVeriKaydiniSilRequested() {
+            window.showVoiceBanner("Kayıtlar siliniyor...")
+            try {
+                appBridge.eventRecorder.clearAllEvents()
+            } catch(e) {
+                console.warn("clearAllEvents desteklenmiyor:", e)
+            }
         }
     }
 
@@ -465,7 +524,6 @@ ApplicationWindow {
             onTourniquetActivated2: window.activateTourniquet()
         }
 
-        // Vücut kanaması — tek ekran (hafif + ağır)
         BleedingBodyScreen {
             id: bleedingBodyScreen
             active: appBridge.screen === "bleeding_body_heavy" || appBridge.screen === "gd_bleeding_body_heavy"

@@ -68,21 +68,26 @@ bool requestInputLinePullUp(gpiod_chip* chip, int lineNumber, const char* consum
     *outLine = line;
     return true;
 }
-}
+} // namespace
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Constructor / Destructor
+// ─────────────────────────────────────────────────────────────────────────────
 
 AppBridge::AppBridge(QObject* parent)
     : QObject(parent)
 {
+    // Sensör değişikliklerini dinle
     connect(&vital_signs_, &VitalSignsService::changed,
             this, &AppBridge::onSensorChanged);
 
-    // Sensör hatalarını terminale ve UI'ya yansıt
     connect(&vital_signs_, &VitalSignsService::errorOccurred,
             this, [this](const QString& msg) {
                 qWarning() << "[VitalSigns ERROR]" << msg;
                 emit errorOccurred(msg);
             });
 
+    // Kanama → CPR yönlendirmesi
     connect(&bleeding_controller_, &BleedingController::cprRequested,
             this, [this]() {
                 bleeding_controller_.stop();
@@ -90,27 +95,42 @@ AppBridge::AppBridge(QObject* parent)
                 emit screenChanged();
             });
 
+    // Sensörü başlat
     qInfo() << "[AppBridge] vital_signs_.startOptional() cagiriliyor...";
     const bool sensorOk = vital_signs_.startOptional();
     qInfo() << "[AppBridge] startOptional sonuc:" << sensorOk
             << "sensorRunning:" << vital_signs_.sensorRunning()
             << "statusText:" << vital_signs_.statusText();
 
+    // Gaz ve UI monitörleri
     connect(&gasPollTimer_, &QTimer::timeout,
             this, &AppBridge::pollGasSensor);
-
     connect(&uiPollTimer_, &QTimer::timeout,
             this, &AppBridge::pollUiInputs);
 
     startGasMonitor();
     startUiInputMonitor();
+
+    // ── Sesli komut sunucusu ──────────────────────────────────────────────────
+    if (voice_server_.start("aks_voice")) {
+        connect(&voice_server_, &VoiceCommandServer::commandReceived,
+                this, &AppBridge::handleVoiceCommand);
+        qInfo() << "[AppBridge] Sesli komut sunucusu hazir";
+    } else {
+        qWarning() << "[AppBridge] Sesli komut sunucusu baslatılamadı (voice_test.py calismazsa sorun olmaz)";
+    }
 }
 
 AppBridge::~AppBridge()
 {
     stopUiInputMonitor();
     stopGasMonitor();
+    voice_server_.stop();
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Screen
+// ─────────────────────────────────────────────────────────────────────────────
 
 QString AppBridge::screen() const
 {
@@ -125,6 +145,143 @@ void AppBridge::setScreen(const QString& screenName)
     screen_ = screenName;
     emit screenChanged();
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sesli komut işleyici
+// ─────────────────────────────────────────────────────────────────────────────
+
+void AppBridge::handleVoiceCommand(const QString& command)
+{
+    qInfo() << "[VoiceCmd] İşleniyor:" << command << "| Ekran:" << screen_;
+
+    // ── Her ekranda çalışan global komutlar ──────────────────────────────────
+    if (command == "ANA_SAYFA") {
+        goHome();
+        return;
+    }
+
+    if (command == "AYARLAR") {
+        openSettings();
+        return;
+    }
+
+    if (command == "VERITABANI") {
+        openRecords();
+        return;
+    }
+
+    if (command == "TURKCE") {
+        setLanguage("tr");
+        return;
+    }
+
+    if (command == "INGILIZCE") {
+        setLanguage("en");
+        return;
+    }
+
+    if (command == "AMBULANS_ARA") {
+        // QML tarafı Qt.openUrlExternally("tel:112") ile yakalayacak
+        emit voiceAmbulansAraRequested();
+        return;
+    }
+
+    if (command == "YARDIM") {
+        emit voiceYardimRequested();
+        return;
+    }
+
+    if (command == "VERI_KAYDINI_SIL") {
+        emit voiceVeriKaydiniSilRequested();
+        return;
+    }
+
+    // ── Acil başlatma — sadece ana ekrandan ──────────────────────────────────
+    if (command == "ACIL_DURUM") {
+        if (screen_ == "home")
+            startEmergency();
+        else
+            qInfo() << "[VoiceCmd] ACIL_DURUM: zaten aktif ekrandayız, yoksayıldı";
+        return;
+    }
+
+    // ── Geri ─────────────────────────────────────────────────────────────────
+    if (command == "GERI") {
+        handleBackButtonPressed();
+        return;
+    }
+
+    // ── İleri (seçimi sağa kaydır) ───────────────────────────────────────────
+    if (command == "ILERI") {
+        if (screen_ == "question")
+            moveSelectionRight();
+        else
+            emit uiEncoderRotated(+1);
+        return;
+    }
+
+    // ── Devam et / encoder bas ───────────────────────────────────────────────
+    if (command == "DEVAM_ET") {
+        handleEncoderPressed();
+        return;
+    }
+
+    // ── Evet ─────────────────────────────────────────────────────────────────
+    if (command == "EVET") {
+        if (screen_ == "question") {
+            // "evet" içeren cevap varsa onu seç, yoksa ilk seçeneği
+            const int idx = findAnswerByNormalizedText("evet");
+            submitAnswer(idx >= 0 ? idx : 0);
+        } else {
+            // Yönlendirme ekranlarındaki "Evet" pop-up'ı için encoder bası gibi
+            handleEncoderPressed();
+        }
+        return;
+    }
+
+    // ── Hayır ────────────────────────────────────────────────────────────────
+    if (command == "HAYIR") {
+        if (screen_ == "question") {
+            // "hayir" içeren cevap varsa onu seç, yoksa ikinci seçeneği
+            const int idx = findAnswerByNormalizedText("hayir");
+            submitAnswer(idx >= 0 ? idx : 1);
+        } else {
+            handleBackButtonPressed();
+        }
+        return;
+    }
+
+    qWarning() << "[VoiceCmd] Bilinmeyen komut:" << command;
+}
+
+int AppBridge::findAnswerByNormalizedText(const QString& normalized) const
+{
+    if (!current_question_.has_value())
+        return -1;
+
+    const QStringList answers = currentAnswers();
+
+    for (int i = 0; i < answers.size(); ++i) {
+        QString a = answers.at(i).toLower().trimmed();
+
+        // Türkçe harf dönüşümü
+        a.replace(QChar(0x131), 'i')  // ı → i
+         .replace(QChar(0x11F), 'g')  // ğ → g
+         .replace(QChar(0xFC),  'u')  // ü → u
+         .replace(QChar(0x15F), 's')  // ş → s
+         .replace(QChar(0xF6),  'o')  // ö → o
+         .replace(QChar(0xE7),  'c'); // ç → c
+
+        if (a.contains(normalized))
+            return i;
+    }
+
+    return -1;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Navigasyon
+// ─────────────────────────────────────────────────────────────────────────────
 
 void AppBridge::restartQuestionsKeepRecording()
 {
@@ -192,6 +349,10 @@ void AppBridge::navigateToLowSpo2()
     emit screenChanged();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Dil
+// ─────────────────────────────────────────────────────────────────────────────
+
 QString AppBridge::language() const
 {
     return language_;
@@ -210,10 +371,18 @@ void AppBridge::setLanguage(const QString& lang)
     emit guidanceChanged();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Media URL
+// ─────────────────────────────────────────────────────────────────────────────
+
 QString AppBridge::mediaBaseUrl() const
 {
     return media_base_url_;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Soru özellikleri
+// ─────────────────────────────────────────────────────────────────────────────
 
 QString AppBridge::currentQuestionText() const
 {
@@ -260,8 +429,8 @@ QVariantList AppBridge::currentAnswerItems() const
 
     for (const auto& ans : current_question_->answers) {
         QVariantMap item;
-        item["id"] = QString::fromStdString(ans.id);
-        item["text"] = QString::fromStdString(Core::pick_text(ans.text, session_.language));
+        item["id"]    = QString::fromStdString(ans.id);
+        item["text"]  = QString::fromStdString(Core::pick_text(ans.text, session_.language));
         item["image"] = QString::fromStdString(ans.image);
         result << item;
     }
@@ -273,6 +442,10 @@ int AppBridge::selectedAnswerIndex() const
 {
     return selected_answer_index_;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tanı özellikleri
+// ─────────────────────────────────────────────────────────────────────────────
 
 QString AppBridge::finalDiagnosis() const
 {
@@ -298,29 +471,22 @@ QString AppBridge::finalProtocolId() const
            : "";
 }
 
-QObject* AppBridge::cprController()
-{
-    return &cpr_controller_;
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// Controller erişimleri
+// ─────────────────────────────────────────────────────────────────────────────
 
-QObject* AppBridge::bleedingController()
-{
-    return &bleeding_controller_;
-}
+QObject* AppBridge::cprController()       { return &cpr_controller_; }
+QObject* AppBridge::bleedingController()  { return &bleeding_controller_; }
+QObject* AppBridge::vitalSigns()          { return &vital_signs_; }
+QObject* AppBridge::eventRecorder()       { return &event_recorder_; }
 
-QObject* AppBridge::vitalSigns()
-{
-    return &vital_signs_;
-}
-
-QObject* AppBridge::eventRecorder()
-{
-    return &event_recorder_;
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// Sensör callback
+// ─────────────────────────────────────────────────────────────────────────────
 
 void AppBridge::onSensorChanged()
 {
-    const bool fingerOn = vital_signs_.fingerPresent();
+    const bool fingerOn      = vital_signs_.fingerPresent();
     const bool pulseDetected = vital_signs_.pulseDetected();
 
     const int bpm = pulseDetected
@@ -328,9 +494,9 @@ void AppBridge::onSensorChanged()
                     : 0;
 
     const bool spo2Stable = vital_signs_.signalStable();
-    const int spo2 = spo2Stable
-                     ? static_cast<int>(std::round(vital_signs_.spo2()))
-                     : 0;
+    const int  spo2       = spo2Stable
+                            ? static_cast<int>(std::round(vital_signs_.spo2()))
+                            : 0;
 
     cpr_controller_.setPulseData(fingerOn, bpm);
     cpr_controller_.setSpo2Data(spo2Stable, spo2);
@@ -340,6 +506,10 @@ void AppBridge::onSensorChanged()
 
     event_recorder_.updateVitals(fingerOn, bpm, spo2Stable, spo2);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Gaz monitörü
+// ─────────────────────────────────────────────────────────────────────────────
 
 void AppBridge::startGasMonitor()
 {
@@ -377,9 +547,9 @@ bool AppBridge::setupGasGpio()
     }
 
     gpiod_line_request_config config = {};
-    config.consumer = "aks_gas_monitor";
+    config.consumer     = "aks_gas_monitor";
     config.request_type = GPIOD_LINE_REQUEST_DIRECTION_INPUT;
-    config.flags = GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
+    config.flags        = GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
 
     if (gpiod_line_request(gasLine_, &config, 0) < 0) {
         qWarning() << "GPIO input request basarisiz:" << kGasBcmLine;
@@ -389,7 +559,7 @@ bool AppBridge::setupGasGpio()
     }
 
     gasDetectedLast_ = false;
-    lastGasAlertMs_ = 0;
+    lastGasAlertMs_  = 0;
 
     return true;
 }
@@ -406,7 +576,7 @@ void AppBridge::pollGasSensor()
     }
 
     const bool detected = kGasActiveLow ? (raw == 0) : (raw == 1);
-    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    const qint64 nowMs  = QDateTime::currentMSecsSinceEpoch();
 
     if (detected && !gasDetectedLast_) {
         if ((nowMs - lastGasAlertMs_) >= kGasCooldownMs) {
@@ -431,6 +601,10 @@ void AppBridge::playGasAlert()
     QProcess::startDetached("aplay", QStringList() << "-q" << audioPath);
     qDebug() << "Gaz algilandi, alarm sesi oynatildi:" << audioPath;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UI giriş monitörü (butonlar + encoder)
+// ─────────────────────────────────────────────────────────────────────────────
 
 void AppBridge::startUiInputMonitor()
 {
@@ -465,36 +639,17 @@ bool AppBridge::setupUiInputGpio()
         return false;
     }
 
-    if (!requestInputLinePullUp(uiChip_, kHomeButtonBcmLine, "aks_home_button", &homeButtonLine_)) {
-        stopUiInputMonitor();
-        return false;
-    }
-
-    if (!requestInputLinePullUp(uiChip_, kBackButtonBcmLine, "aks_back_button", &backButtonLine_)) {
-        stopUiInputMonitor();
-        return false;
-    }
-
-    if (!requestInputLinePullUp(uiChip_, kEncoderClkBcmLine, "aks_encoder_clk", &encoderClkLine_)) {
-        stopUiInputMonitor();
-        return false;
-    }
-
-    if (!requestInputLinePullUp(uiChip_, kEncoderDtBcmLine, "aks_encoder_dt", &encoderDtLine_)) {
-        stopUiInputMonitor();
-        return false;
-    }
-
-    if (!requestInputLinePullUp(uiChip_, kEncoderSwBcmLine, "aks_encoder_sw", &encoderSwLine_)) {
-        stopUiInputMonitor();
-        return false;
-    }
+    if (!requestInputLinePullUp(uiChip_, kHomeButtonBcmLine, "aks_home_button", &homeButtonLine_)) { stopUiInputMonitor(); return false; }
+    if (!requestInputLinePullUp(uiChip_, kBackButtonBcmLine, "aks_back_button", &backButtonLine_)) { stopUiInputMonitor(); return false; }
+    if (!requestInputLinePullUp(uiChip_, kEncoderClkBcmLine, "aks_encoder_clk", &encoderClkLine_)) { stopUiInputMonitor(); return false; }
+    if (!requestInputLinePullUp(uiChip_, kEncoderDtBcmLine,  "aks_encoder_dt",  &encoderDtLine_))  { stopUiInputMonitor(); return false; }
+    if (!requestInputLinePullUp(uiChip_, kEncoderSwBcmLine,  "aks_encoder_sw",  &encoderSwLine_))  { stopUiInputMonitor(); return false; }
 
     const int homeRaw = gpiod_line_get_value(homeButtonLine_);
     const int backRaw = gpiod_line_get_value(backButtonLine_);
-    const int swRaw = gpiod_line_get_value(encoderSwLine_);
-    const int clkRaw = gpiod_line_get_value(encoderClkLine_);
-    const int dtRaw = gpiod_line_get_value(encoderDtLine_);
+    const int swRaw   = gpiod_line_get_value(encoderSwLine_);
+    const int clkRaw  = gpiod_line_get_value(encoderClkLine_);
+    const int dtRaw   = gpiod_line_get_value(encoderDtLine_);
 
     if (homeRaw < 0 || backRaw < 0 || swRaw < 0 || clkRaw < 0 || dtRaw < 0) {
         qWarning() << "baslangic gpio degerleri okunamadi";
@@ -504,14 +659,14 @@ bool AppBridge::setupUiInputGpio()
 
     homeButtonLastPressed_ = kUiButtonsActiveLow ? (homeRaw == 0) : (homeRaw == 1);
     backButtonLastPressed_ = kUiButtonsActiveLow ? (backRaw == 0) : (backRaw == 1);
-    encoderSwLastPressed_ = kUiButtonsActiveLow ? (swRaw == 0) : (swRaw == 1);
-    encoderClkLastRaw_ = clkRaw;
-    encoderDtLastRaw_ = dtRaw;
+    encoderSwLastPressed_  = kUiButtonsActiveLow ? (swRaw  == 0) : (swRaw  == 1);
+    encoderClkLastRaw_     = clkRaw;
+    encoderDtLastRaw_      = dtRaw;
 
-    lastHomeButtonMs_ = 0;
-    lastBackButtonMs_ = 0;
+    lastHomeButtonMs_   = 0;
+    lastBackButtonMs_   = 0;
     lastEncoderPressMs_ = 0;
-    lastEncoderStepMs_ = 0;
+    lastEncoderStepMs_  = 0;
 
     return true;
 }
@@ -523,9 +678,9 @@ void AppBridge::pollUiInputs()
 
     const int homeRaw = gpiod_line_get_value(homeButtonLine_);
     const int backRaw = gpiod_line_get_value(backButtonLine_);
-    const int clkRaw = gpiod_line_get_value(encoderClkLine_);
-    const int dtRaw = gpiod_line_get_value(encoderDtLine_);
-    const int swRaw = gpiod_line_get_value(encoderSwLine_);
+    const int clkRaw  = gpiod_line_get_value(encoderClkLine_);
+    const int dtRaw   = gpiod_line_get_value(encoderDtLine_);
+    const int swRaw   = gpiod_line_get_value(encoderSwLine_);
 
     if (homeRaw < 0 || backRaw < 0 || clkRaw < 0 || dtRaw < 0 || swRaw < 0) {
         qWarning() << "ui gpio okunamadi";
@@ -536,7 +691,7 @@ void AppBridge::pollUiInputs()
 
     const bool homePressed = kUiButtonsActiveLow ? (homeRaw == 0) : (homeRaw == 1);
     const bool backPressed = kUiButtonsActiveLow ? (backRaw == 0) : (backRaw == 1);
-    const bool swPressed = kUiButtonsActiveLow ? (swRaw == 0) : (swRaw == 1);
+    const bool swPressed   = kUiButtonsActiveLow ? (swRaw   == 0) : (swRaw   == 1);
 
     if (homePressed && !homeButtonLastPressed_ &&
         (nowMs - lastHomeButtonMs_) >= kButtonDebounceMs) {
@@ -571,11 +726,15 @@ void AppBridge::pollUiInputs()
         encoderClkLastRaw_ = clkRaw;
     }
 
-    encoderDtLastRaw_ = dtRaw;
+    encoderDtLastRaw_      = dtRaw;
     homeButtonLastPressed_ = homePressed;
     backButtonLastPressed_ = backPressed;
-    encoderSwLastPressed_ = swPressed;
+    encoderSwLastPressed_  = swPressed;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fiziksel giriş işleyiciler
+// ─────────────────────────────────────────────────────────────────────────────
 
 void AppBridge::handleHomeButtonPressed()
 {
@@ -616,6 +775,10 @@ void AppBridge::handleEncoderRotate(int direction)
         emit uiEncoderRotated(direction);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// initialize
+// ─────────────────────────────────────────────────────────────────────────────
+
 bool AppBridge::initialize(const QString& basePath)
 {
     try {
@@ -642,6 +805,10 @@ bool AppBridge::initialize(const QString& basePath)
         return false;
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Ekran geçişleri
+// ─────────────────────────────────────────────────────────────────────────────
 
 void AppBridge::goHome()
 {
@@ -728,6 +895,10 @@ void AppBridge::startEmergency()
     emit screenChanged();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Soru cevaplama
+// ─────────────────────────────────────────────────────────────────────────────
+
 void AppBridge::submitAnswer(int index)
 {
     if (!current_question_.has_value())
@@ -737,9 +908,9 @@ void AppBridge::submitAnswer(int index)
         return;
 
     {
-        const QString qText = currentQuestionText();
+        const QString qText  = currentQuestionText();
         const QStringList answers = currentAnswers();
-        const QString aText = (index < answers.size()) ? answers.at(index) : QString();
+        const QString aText  = (index < answers.size()) ? answers.at(index) : QString();
         event_recorder_.logQuestion(qText, aText);
     }
 
@@ -776,8 +947,8 @@ void AppBridge::previousQuestion()
     if (screen_ != "question")
         return;
 
-    std::optional<Question> previousQuestionValue;
-    std::optional<std::string> previousAnswerId;
+    std::optional<Question>     previousQuestionValue;
+    std::optional<std::string>  previousAnswerId;
 
     if (!core_.go_to_previous_question(session_, previousQuestionValue, previousAnswerId))
         return;
@@ -825,6 +996,10 @@ void AppBridge::activateSelectedAnswer()
     submitAnswer(selected_answer_index_);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// İç yardımcılar
+// ─────────────────────────────────────────────────────────────────────────────
+
 void AppBridge::clearQuestionState()
 {
     current_question_.reset();
@@ -843,8 +1018,8 @@ void AppBridge::updateQuestionState()
 
 void AppBridge::updateResultState()
 {
-    final_diagnosis_ = core_.get_final_diagnosis(session_);
-    final_screen_id_ = session_.final_screen_id;
+    final_diagnosis_  = core_.get_final_diagnosis(session_);
+    final_screen_id_  = session_.final_screen_id;
     final_protocol_id_ = session_.final_protocol_id;
 }
 
