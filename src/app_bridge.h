@@ -5,6 +5,7 @@
 #include "cpr_controller.h"
 #include "event_recorder.h"
 #include "vital_signs_service.h"
+#include "voice_command_server.h"
 
 #include <QObject>
 #include <QStringList>
@@ -85,11 +86,23 @@ signals:
     void guidanceChanged();
     void selectedAnswerIndexChanged();
     void errorOccurred(const QString& message);
+
+    // Fiziksel giriş sinyalleri
     void uiBackRequested();
     void uiEncoderPressed();
     void uiEncoderRotated(int direction);
 
+    // Sesli komut özel sinyalleri — QML tarafından yakalanır
+    void voiceAmbulansAraRequested();
+    void voiceYardimRequested();
+    void voiceVeriKaydiniSilRequested();
+
 private:
+    // Sesli komut işleyici
+    void handleVoiceCommand(const QString& command);
+    int  findAnswerByNormalizedText(const QString& normalized) const;
+
+    // Yardımcılar
     void clearQuestionState();
     void clearResultState();
     void updateQuestionState();
@@ -97,12 +110,16 @@ private:
     void openFinalScreen();
     void onSensorChanged();
 
+    int findAnswerIndexById(const std::string& answerId) const;
+
+    // Gaz monitörü
     void startGasMonitor();
     void stopGasMonitor();
     bool setupGasGpio();
     void pollGasSensor();
     void playGasAlert();
 
+    // Fiziksel giriş monitörü
     void startUiInputMonitor();
     void stopUiInputMonitor();
     bool setupUiInputGpio();
@@ -113,52 +130,55 @@ private:
     void handleEncoderPressed();
     void handleEncoderRotate(int direction);
 
-    int findAnswerIndexById(const std::string& answerId) const;
-
 private:
-    Core core_;
-    CprController cpr_controller_;
+    // İş mantığı
+    Core              core_;
+    CprController     cpr_controller_;
     BleedingController bleeding_controller_;
     VitalSignsService vital_signs_;
-    Session session_;
-    EventRecorder event_recorder_;
+    Session           session_;
+    EventRecorder     event_recorder_;
 
-    QString screen_ = "home";
-    QString language_ = "tr";
+    // Sesli komut sunucusu
+    VoiceCommandServer voice_server_;
+
+    // Durum
+    QString screen_         = "home";
+    QString language_       = "tr";
     QString media_base_url_;
+    bool    initialized_    = false;
 
-    bool initialized_ = false;
-
-    std::optional<Question> current_question_;
-    std::optional<Diagnosis> final_diagnosis_;
-    std::optional<std::string> final_screen_id_;
-    std::optional<std::string> final_protocol_id_;
+    std::optional<Question>     current_question_;
+    std::optional<Diagnosis>    final_diagnosis_;
+    std::optional<std::string>  final_screen_id_;
+    std::optional<std::string>  final_protocol_id_;
 
     int selected_answer_index_ = 0;
 
-    QTimer gasPollTimer_;
-    gpiod_chip* gasChip_ = nullptr;
-    gpiod_line* gasLine_ = nullptr;
+    // Gaz sensörü GPIO
+    QTimer       gasPollTimer_;
+    gpiod_chip*  gasChip_          = nullptr;
+    gpiod_line*  gasLine_          = nullptr;
+    bool         gasDetectedLast_  = false;
+    qint64       lastGasAlertMs_   = 0;
 
-    bool gasDetectedLast_ = false;
-    qint64 lastGasAlertMs_ = 0;
+    // UI giriş GPIO
+    QTimer       uiPollTimer_;
+    gpiod_chip*  uiChip_              = nullptr;
+    gpiod_line*  homeButtonLine_      = nullptr;
+    gpiod_line*  backButtonLine_      = nullptr;
+    gpiod_line*  encoderClkLine_      = nullptr;
+    gpiod_line*  encoderDtLine_       = nullptr;
+    gpiod_line*  encoderSwLine_       = nullptr;
 
-    QTimer uiPollTimer_;
-    gpiod_chip* uiChip_ = nullptr;
-    gpiod_line* homeButtonLine_ = nullptr;
-    gpiod_line* backButtonLine_ = nullptr;
-    gpiod_line* encoderClkLine_ = nullptr;
-    gpiod_line* encoderDtLine_ = nullptr;
-    gpiod_line* encoderSwLine_ = nullptr;
+    bool   homeButtonLastPressed_  = false;
+    bool   backButtonLastPressed_  = false;
+    bool   encoderSwLastPressed_   = false;
+    int    encoderClkLastRaw_      = 1;
+    int    encoderDtLastRaw_       = 1;
 
-    bool homeButtonLastPressed_ = false;
-    bool backButtonLastPressed_ = false;
-    bool encoderSwLastPressed_ = false;
-    int encoderClkLastRaw_ = 1;
-    int encoderDtLastRaw_ = 1;
-
-    qint64 lastHomeButtonMs_ = 0;
-    qint64 lastBackButtonMs_ = 0;
-    qint64 lastEncoderPressMs_ = 0;
-    qint64 lastEncoderStepMs_ = 0;
+    qint64 lastHomeButtonMs_    = 0;
+    qint64 lastBackButtonMs_    = 0;
+    qint64 lastEncoderPressMs_  = 0;
+    qint64 lastEncoderStepMs_   = 0;
 };
