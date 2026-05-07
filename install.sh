@@ -7,6 +7,9 @@ INSTALL_DIR="/opt/AKS"
 CONFIG_DIR="/etc/aks"
 DATA_DIR="/var/lib/aks"
 LOG_DIR="/var/log/aks"
+VOSK_MODEL_URL="https://alphacephei.com/vosk/models/vosk-model-small-tr-0.3.zip"
+VOSK_MODEL_ZIP="vosk-model-small-tr-0.3.zip"
+VOSK_MODEL_DIR="vosk-model-small-tr-0.3"
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ "$EUID" -ne 0 ]; then
@@ -26,7 +29,7 @@ echo " Hedef     : $INSTALL_DIR"
 echo "=================================================="
 
 echo ""
-echo "[1/7] C++ ve Qt bağımlılıkları kuruluyor..."
+echo "[1/8] C++ ve Qt bağımlılıkları kuruluyor..."
 apt-get update -qq
 
 apt-get install -y \
@@ -49,10 +52,12 @@ apt-get install -y \
     qml6-module-qtmultimedia \
     libgl1-mesa-dev \
     libpulse-dev \
-    alsa-utils
+    alsa-utils \
+    unzip \
+    wget
 
 echo ""
-echo "[2/7] Python ve Vosk bağımlılıkları kuruluyor..."
+echo "[2/8] Python ve Vosk bağımlılıkları kuruluyor..."
 apt-get install -y \
     python3 \
     python3-pip \
@@ -64,11 +69,11 @@ pip3 install --break-system-packages vosk sounddevice numpy 2>/dev/null || \
 pip3 install vosk sounddevice numpy
 
 echo ""
-echo "[3/7] Klasörler oluşturuluyor..."
+echo "[3/8] Klasörler oluşturuluyor..."
 mkdir -p "$INSTALL_DIR" "$CONFIG_DIR" "$DATA_DIR" "$LOG_DIR"
 
 echo ""
-echo "[4/7] Dosyalar $INSTALL_DIR altına kopyalanıyor..."
+echo "[4/8] Dosyalar $INSTALL_DIR altına kopyalanıyor..."
 rsync -a --delete \
     --exclude "build/" \
     --exclude ".git/" \
@@ -81,7 +86,7 @@ rsync -a --delete \
 chown -R "$INSTALL_USER:$INSTALL_USER" "$INSTALL_DIR" "$DATA_DIR" "$LOG_DIR"
 
 echo ""
-echo "[5/7] Proje derleniyor..."
+echo "[5/8] Proje derleniyor..."
 cd "$INSTALL_DIR"
 rm -rf build
 mkdir -p build
@@ -101,7 +106,22 @@ fi
 echo "Binary: $REAL_BINARY"
 
 echo ""
-echo "[6/7] Başlatma dosyaları oluşturuluyor..."
+echo "[6/8] Vosk Türkçe model indiriliyor..."
+cd "$INSTALL_DIR"
+if [ -d "model-tr" ]; then
+    echo "model-tr zaten mevcut, atlanıyor."
+else
+    echo "İndiriliyor: $VOSK_MODEL_URL"
+    wget -q --show-progress "$VOSK_MODEL_URL" -O "$VOSK_MODEL_ZIP"
+    unzip -q "$VOSK_MODEL_ZIP"
+    mv "$VOSK_MODEL_DIR" model-tr
+    rm -f "$VOSK_MODEL_ZIP"
+    echo "Model kuruldu: $INSTALL_DIR/model-tr"
+fi
+chown -R "$INSTALL_USER:$INSTALL_USER" "$INSTALL_DIR/model-tr"
+
+echo ""
+echo "[7/8] Başlatma dosyaları oluşturuluyor..."
 cat > "$INSTALL_DIR/run.sh" <<RUNEOF
 #!/usr/bin/env bash
 set -e
@@ -118,7 +138,7 @@ if [ -f "$INSTALL_DIR/voice_test.py" ]; then
 #!/usr/bin/env bash
 cd "$INSTALL_DIR"
 if [ ! -d "model-tr" ]; then
-    echo "Hata: model-tr klasörü bulunamadı: $INSTALL_DIR/model-tr"
+    echo "Hata: model-tr klasörü bulunamadı."
     exit 1
 fi
 python3 "$INSTALL_DIR/voice_test.py" >> "$LOG_DIR/voice.log" 2>&1
@@ -128,7 +148,7 @@ VOICEEOF
 fi
 
 echo ""
-echo "[7/7] Otomatik başlatma ayarlanıyor..."
+echo "[8/8] Otomatik başlatma ayarlanıyor..."
 mkdir -p "$USER_HOME/.config/autostart"
 
 cat > "$USER_HOME/.config/autostart/aks.desktop" <<DESKTOPEOF
@@ -172,14 +192,6 @@ echo "=================================================="
 echo " Kurulum Tamamlandı"
 echo "=================================================="
 echo " Çalıştırmak için:  $INSTALL_DIR/run.sh"
-echo " Loglar:            $LOG_DIR/aks.log"
-if [ -f "$INSTALL_DIR/run_voice.sh" ]; then
-echo ""
 echo " Sesli komut:       $INSTALL_DIR/run_voice.sh"
-echo " NOT: model-tr klasörü gerekli:"
-echo "   cd $INSTALL_DIR"
-echo "   wget https://alphacephei.com/vosk/models/vosk-model-small-tr-0.3.zip"
-echo "   unzip vosk-model-small-tr-0.3.zip"
-echo "   mv vosk-model-small-tr-0.3 model-tr"
-fi
+echo " Loglar:            $LOG_DIR/aks.log"
 echo "=================================================="
