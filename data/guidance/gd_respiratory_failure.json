@@ -1,0 +1,24 @@
+{
+  "id": "gd_respiratory_failure",
+  "title": {
+    "tr": "Solunum yetmezliği yaklaşımı",
+    "en": "Respiratory failure response"
+  },
+  "severity": "critical",
+  "steps": {
+    "tr": [
+      "112'yi ara veya arat.",
+      "Hava yolunun açık olduğundan emin ol.",
+      "Kişiyi solunumu kolaylaştıracak uygun pozisyonda tut.",
+      "Solunum sayısını, çabasını ve bilinç durumunu yakından izle.",
+      "Solunum durursa temel yaşam desteğine geç."
+    ],
+    "en": [
+      "Call emergency services.",
+      "Ensure the airway is open.",
+      "Keep the patient in a position that helps breathing.",
+      "Monitor breathing effort, rate, and consciousness closely.",
+      "Begin basic life support if breathing stops."
+    ]
+  }
+}

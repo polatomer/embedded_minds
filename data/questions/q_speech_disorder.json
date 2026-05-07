@@ -1,0 +1,24 @@
+{
+  "id": "q_speech_disorder",
+  "order": 11,
+  "text": {
+    "tr": "Konuşması anlaşılmıyor mu veya hiç konuşamıyor mu?",
+    "en": "Is speech slurred, confused, or absent?"
+  },
+  "hint": {
+    "tr": "Adını ve nerede olduğunu söylemesini isteyin. Kelimeleri birbirine karıştırıyorsa, anlamsız sesler çıkarıyorsa ya da hiç yanıt veremiyorsa Evet seçin.",
+    "en": "Ask them to say their name and where they are. Select Yes if words are jumbled, speech is slurred, meaningless sounds come out, or there is no response."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_stroke": 3 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_stroke": -1 }
+    }
+  ]
+}

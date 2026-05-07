@@ -1,0 +1,24 @@
+{
+  "id": "q_facial_droop",
+  "order": 13,
+  "text": {
+    "tr": "Gülümsediğinde yüzünün bir yanı düşük mü?",
+    "en": "Does one side of the face droop when smiling?"
+  },
+  "hint": {
+    "tr": "Gülümsemesini veya dişlerini göstermesini isteyin. Ağzının bir köşesi yukarı kalkmıyorsa, bir gözü tam kapanmıyorsa ya da yüzünün bir yanı hareketsiz görünüyorsa Evet seçin.",
+    "en": "Ask them to smile or show their teeth. Select Yes if one corner of the mouth doesn't rise, one eye won't fully close, or one side of the face looks frozen."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_stroke": 3 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_stroke": -1 }
+    }
+  ]
+}

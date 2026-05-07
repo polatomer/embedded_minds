@@ -1,0 +1,23 @@
+{
+  "id": "gd_bleeding_leg_light",
+  "title": {
+    "tr": "Bacakta hafif kanama yaklaşımı",
+    "en": "Light leg bleeding response"
+  },
+  "severity": "urgent",
+  "animation_id": "bleeding_leg_light_01",
+  "steps": {
+    "tr": [
+      "Temiz bir gazlı bez veya temiz bezle yarayı kapat.",
+      "Kanayan bölgeye doğrudan bası uygula.",
+      "Kanamayı izle.",
+      "Kanama artarsa ağır kanama yaklaşımına geç."
+    ],
+    "en": [
+      "Cover the wound with clean gauze or clean cloth.",
+      "Apply direct pressure to the bleeding site.",
+      "Monitor the bleeding.",
+      "Move to the heavy bleeding response if bleeding increases."
+    ]
+  }
+}

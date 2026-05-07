@@ -1,0 +1,11 @@
+{
+  "id": "dx_seizure_emergency",
+  "name": {
+    "tr": "Nöbet acili şüphesi",
+    "en": "Suspected seizure emergency"
+  },
+  "min_score": 5,
+  "priority": 80,
+  "early_finish": true,
+  "guidance_id": "gd_seizure_emergency"
+}

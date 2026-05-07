@@ -1,0 +1,34 @@
+{
+  "id": "q_bleeding_location",
+  "order": 31,
+  "requires_question_id": "q_massive_bleeding",
+  "requires_answer_id": "yes",
+  "text": {
+    "tr": "Kanama nerede?",
+    "en": "Where is the bleeding located?"
+  },
+  "hint": {
+    "tr": "Kanamayı gördüğünüz bölgeyi aşağıdaki resimlerden seçin.",
+    "en": "Select the area where you see the bleeding from the images below."
+  },
+  "answers": [
+    {
+      "id": "arm",
+      "text": { "tr": "Kol", "en": "Arm" },
+      "image": "qrc:/ui/assets/bleeding/arm.png",
+      "scores": { "dx_bleeding_arm_light": 10, "dx_bleeding_arm_heavy": 10 }
+    },
+    {
+      "id": "leg",
+      "text": { "tr": "Bacak", "en": "Leg" },
+      "image": "qrc:/ui/assets/bleeding/leg.png",
+      "scores": { "dx_bleeding_leg_light": 10, "dx_bleeding_leg_heavy": 10 }
+    },
+    {
+      "id": "body",
+      "text": { "tr": "Vücut / baş / gövde", "en": "Body / head / trunk" },
+      "image": "qrc:/ui/assets/bleeding/body.png",
+      "scores": { "dx_bleeding_body_light": 10, "dx_bleeding_body_heavy": 10 }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "dx_bleeding_leg_light",
+  "name": {
+    "tr": "Bacakta hafif kanama şüphesi",
+    "en": "Suspected light leg bleeding"
+  },
+  "min_score": 15,
+  "priority": 80,
+  "early_finish": true,
+  "guidance_id": "gd_bleeding_leg_light"
+}

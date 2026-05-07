@@ -1,0 +1,26 @@
+{
+  "id": "q_bleeding_pulsatile",
+  "order": 32,
+  "requires_question_id": "q_massive_bleeding",
+  "requires_answer_id": "yes",
+  "text": {
+    "tr": "Kanama çok mu şiddetli?",
+    "en": "Is the bleeding severe?"
+  },
+  "hint": {
+    "tr": "Bezi veya giysiyi çok hızlı ıslatıyorsa, yerde kan birikiyorsa ya da nabız atışıyla birlikte fışkırır gibi akıyorsa Evet seçin. Sızdırıyor ama kontrol altına alınabiliyorsa Hayır seçin.",
+    "en": "Select Yes if blood is soaking through material rapidly, pooling on the ground, or spurting in pulses. Select No if it is oozing but can be managed with pressure."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet, çok şiddetli", "en": "Yes, very severe" },
+      "scores": { "dx_bleeding_arm_heavy": 5, "dx_bleeding_leg_heavy": 5, "dx_bleeding_body_heavy": 5 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır, daha hafif", "en": "No, more moderate" },
+      "scores": { "dx_bleeding_arm_light": 5, "dx_bleeding_leg_light": 5, "dx_bleeding_body_light": 5 }
+    }
+  ]
+}

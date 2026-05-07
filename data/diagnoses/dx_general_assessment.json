@@ -1,0 +1,11 @@
+{
+  "id": "dx_general_assessment",
+  "name": {
+    "tr": "Genel değerlendirme gerekli",
+    "en": "General assessment needed"
+  },
+  "min_score": 0,
+  "priority": -100,
+  "early_finish": false,
+  "guidance_id": "gd_general_assessment"
+}

@@ -1,0 +1,26 @@
+{
+  "id": "q_pain_radiation",
+  "order": 9,
+  "requires_question_id": "q_chest_pain",
+  "requires_answer_id": "yes",
+  "text": {
+    "tr": "Bu ağrı sol kola, omzuna, boynuna veya çenesine yayılıyor mu?",
+    "en": "Does the pain spread to the left arm, shoulder, neck, or jaw?"
+  },
+  "hint": {
+    "tr": "Sol kolunu kaldırmasını isteyin — ağrı varsa yüzü gerilecektir. Çenesini veya boynunu tutuyorsa da Evet seçin. Ağrının nereye gittiğini tarif etmesini isteyin.",
+    "en": "Ask them to raise their left arm — their face will tense if it hurts. Select Yes if they are also holding their jaw or neck, or describe pain spreading to those areas."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_acute_cardiac_event": 3 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_acute_cardiac_event": -1 }
+    }
+  ]
+}

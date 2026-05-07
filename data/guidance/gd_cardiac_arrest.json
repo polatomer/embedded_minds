@@ -1,0 +1,24 @@
+{
+  "id": "gd_cardiac_arrest",
+  "title": {
+    "tr": "Kardiyak arrest yaklaşımı",
+    "en": "Cardiac arrest response"
+  },
+  "severity": "critical",
+  "steps": {
+    "tr": [
+      "112'yi ara veya arat.",
+      "Kişinin yanıt verip vermediğini ve normal soluyup solumadığını yeniden kontrol et.",
+      "Uygun zeminde temel yaşam desteğine başla.",
+      "Varsa otomatik eksternal defibrilatörü hazırla ve talimatlarını uygula.",
+      "Profesyonel ekip gelene kadar müdahaleyi sürdür."
+    ],
+    "en": [
+      "Call emergency services.",
+      "Recheck responsiveness and normal breathing.",
+      "Start basic life support on a suitable surface.",
+      "Use an AED if available and follow its instructions.",
+      "Continue until professional help arrives."
+    ]
+  }
+}

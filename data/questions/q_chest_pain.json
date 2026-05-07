@@ -1,0 +1,24 @@
+{
+  "id": "q_chest_pain",
+  "order": 8,
+  "text": {
+    "tr": "Göğsünde ağrı, baskı veya sıkışma hissediyor mu?",
+    "en": "Is there chest pain, pressure, or tightness?"
+  },
+  "hint": {
+    "tr": "Göğsünü eliyle tutup tutmadığına bakın. Ağrıyı tarif etmesini isteyin — ezici, sıkıştırıcı veya yanıcı bir his kalp acillerine işaret eder. Bilinç kapalıysa doğrudan Evet seçin.",
+    "en": "Check if they are clutching their chest. Ask them to describe the pain — crushing, squeezing, or burning sensations indicate cardiac emergency. If unconscious, select Yes."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_acute_cardiac_event": 4, "dx_respiratory_failure": 1 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_acute_cardiac_event": -2 }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "dx_bleeding_leg_heavy",
+  "name": {
+    "tr": "Bacakta ağır kanama şüphesi",
+    "en": "Suspected heavy leg bleeding"
+  },
+  "min_score": 15,
+  "priority": 90,
+  "early_finish": true,
+  "guidance_id": "gd_bleeding_leg_heavy"
+}

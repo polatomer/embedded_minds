@@ -1,0 +1,11 @@
+{
+  "id": "dx_bleeding_body_light",
+  "name": {
+    "tr": "Vücutta hafif kanama şüphesi",
+    "en": "Suspected light body bleeding"
+  },
+  "min_score": 15,
+  "priority": 82,
+  "early_finish": true,
+  "guidance_id": "gd_bleeding_body_light"
+}

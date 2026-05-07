@@ -1,0 +1,24 @@
+{
+  "id": "q_skin_reaction",
+  "order": 6,
+  "text": {
+    "tr": "Ciltte kızarıklık, kaşıntı veya kabarcıklar var mı?",
+    "en": "Is there skin redness, itching, or hives?"
+  },
+  "hint": {
+    "tr": "Kollarına, boynuna, göğsüne veya sırtına bakın. Pembe-kırmızı kabarık lekeler (kurdeşen), yaygın kızarıklık veya kaşıntı varsa Evet seçin.",
+    "en": "Check arms, neck, chest, and back. Select Yes if there are raised red patches (hives), widespread redness, or itching."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_anaphylaxis": 3 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_anaphylaxis": -1 }
+    }
+  ]
+}

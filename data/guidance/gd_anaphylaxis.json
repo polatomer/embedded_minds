@@ -1,0 +1,24 @@
+{
+  "id": "gd_anaphylaxis",
+  "title": {
+    "tr": "Anafilaksi yaklaşımı",
+    "en": "Anaphylaxis response"
+  },
+  "severity": "critical",
+  "steps": {
+    "tr": [
+      "112'yi ara veya arat.",
+      "Kişiyi yalnız bırakma ve yakın gözlem altında tut.",
+      "Solunumu zorlaştıran bulgular varsa hava yolunu dikkatle izle.",
+      "Durumu kötüleşirse acil yaşam desteği hazırlığını yap.",
+      "Ani bilinç kaybı veya solunum durması olursa temel yaşam desteğine geç."
+    ],
+    "en": [
+      "Call emergency services.",
+      "Do not leave the person alone and monitor closely.",
+      "Watch the airway carefully if there are breathing-related symptoms.",
+      "Prepare for emergency life support if the condition worsens.",
+      "Start basic life support if sudden collapse or breathing arrest occurs."
+    ]
+  }
+}

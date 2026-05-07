@@ -1,0 +1,24 @@
+{
+  "id": "q_shortness_of_breath",
+  "order": 7,
+  "text": {
+    "tr": "Nefes almakta belirgin şekilde zorlanıyor mu?",
+    "en": "Is there noticeable difficulty breathing?"
+  },
+  "hint": {
+    "tr": "Birkaç kelime söylemesini isteyin. Her kelime arasında soluk alıyorsa, boyun ve omuz kasları geriliyorsa ya da dudakları morumsu görünüyorsa Evet seçin.",
+    "en": "Ask them to say a few words. Select Yes if they gasp between words, their neck muscles are straining, or their lips look bluish."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_respiratory_failure": 3, "dx_anaphylaxis": 2, "dx_acute_cardiac_event": 1 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_respiratory_failure": -1, "dx_anaphylaxis": -1 }
+    }
+  ]
+}

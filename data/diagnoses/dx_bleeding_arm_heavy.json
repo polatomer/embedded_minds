@@ -1,0 +1,13 @@
+{
+  "id": "dx_bleeding_arm_heavy",
+  "name": {
+    "tr": "Kolda ağır kanama şüphesi",
+    "en": "Suspected heavy arm bleeding"
+  },
+  "min_score": 15,
+  "priority": 90,
+  "early_finish": true,
+  "guidance_id": "gd_bleeding_arm_heavy",
+  "screen_id": "bleeding_arm_heavy",
+  "protocol_id": "bleeding_arm_heavy"
+}

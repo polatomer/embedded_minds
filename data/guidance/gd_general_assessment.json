@@ -1,0 +1,24 @@
+{
+  "id": "gd_general_assessment",
+  "title": {
+    "tr": "Genel değerlendirme",
+    "en": "General assessment"
+  },
+  "severity": "routine",
+  "steps": {
+    "tr": [
+      "Hastayı yeniden genel durum açısından değerlendir.",
+      "Hayatı tehdit eden yeni belirti gelişirse acil akışı yeniden başlat.",
+      "Şikayet sürüyorsa uygun sağlık değerlendirmesine yönlendir.",
+      "Bilinç, solunum veya dolaşımda bozulma olursa acil yardım çağrısı yap.",
+      "Durum değişirse sistemi yeniden kullanarak tekrar sınıflandır."
+    ],
+    "en": [
+      "Reassess the patient’s overall condition.",
+      "Restart the emergency flow if a life-threatening symptom appears.",
+      "Direct the person to appropriate medical evaluation if symptoms continue.",
+      "Call emergency services if consciousness, breathing, or circulation worsens.",
+      "Re-run the system if the condition changes."
+    ]
+  }
+}

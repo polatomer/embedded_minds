@@ -1,0 +1,24 @@
+{
+  "id": "q_seizure",
+  "order": 4,
+  "text": {
+    "tr": "Vücudu kontrolsüz kasılıyor veya sarsılıyor mu?",
+    "en": "Is the body convulsing or shaking uncontrollably?"
+  },
+  "hint": {
+    "tr": "Kollar ve bacaklar istemsiz olarak spazmlar yapıyorsa, tüm vücut titriyorsa ya da hasta yerde yatıp kasılıyorsa Evet seçin.",
+    "en": "Select Yes if arms and legs are jerking involuntarily, the whole body is shaking, or the patient is convulsing on the ground."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_seizure_emergency": 5, "dx_respiratory_failure": 1 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_seizure_emergency": -2 }
+    }
+  ]
+}

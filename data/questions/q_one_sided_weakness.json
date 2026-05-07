@@ -1,0 +1,24 @@
+{
+  "id": "q_one_sided_weakness",
+  "order": 12,
+  "text": {
+    "tr": "Vücudunun bir tarafında güçsüzlük veya uyuşma var mı?",
+    "en": "Is there weakness or numbness on one side of the body?"
+  },
+  "hint": {
+    "tr": "Her iki kolunu aynı anda yukarı kaldırmasını isteyin ve gözlerini kapatmasını söyleyin. Bir kol yavaşça düşüyorsa veya kaldıramıyorsa Evet seçin. Yüzünde veya bacağında uyuşma bildiriyorsa da Evet seçin.",
+    "en": "Ask them to raise both arms with eyes closed. Select Yes if one arm drifts down or cannot be raised. Also Yes if they report numbness in face or leg on one side."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_stroke": 4 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_stroke": -2 }
+    }
+  ]
+}

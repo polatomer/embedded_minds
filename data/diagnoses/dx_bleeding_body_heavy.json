@@ -1,0 +1,11 @@
+{
+  "id": "dx_bleeding_body_heavy",
+  "name": {
+    "tr": "Vücutta ağır kanama şüphesi",
+    "en": "Suspected heavy body bleeding"
+  },
+  "min_score": 15,
+  "priority": 92,
+  "early_finish": true,
+  "guidance_id": "gd_bleeding_body_heavy"
+}

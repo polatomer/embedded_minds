@@ -1,0 +1,24 @@
+{
+  "id": "gd_stroke",
+  "title": {
+    "tr": "İnme yaklaşımı",
+    "en": "Stroke response"
+  },
+  "severity": "urgent",
+  "steps": {
+    "tr": [
+      "112'yi ara veya arat.",
+      "Belirti başlangıç zamanını mümkünse not et.",
+      "Kişiyi güvenli ve rahat bir pozisyonda tut.",
+      "Konuşma, bilinç ve solunum durumunu yakından izle.",
+      "Ani kötüleşme olursa acil yaşam desteği yaklaşımına hazırlan."
+    ],
+    "en": [
+      "Call emergency services.",
+      "Note the symptom onset time if possible.",
+      "Keep the person in a safe and comfortable position.",
+      "Monitor speech, consciousness, and breathing closely.",
+      "Be ready to move to emergency life support if the condition suddenly worsens."
+    ]
+  }
+}

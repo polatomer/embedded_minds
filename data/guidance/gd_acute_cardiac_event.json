@@ -1,0 +1,24 @@
+{
+  "id": "gd_acute_cardiac_event",
+  "title": {
+    "tr": "Akut kardiyak olay yaklaşımı",
+    "en": "Acute cardiac event response"
+  },
+  "severity": "urgent",
+  "steps": {
+    "tr": [
+      "112'yi ara veya arat.",
+      "Kişiyi dinlendir ve fiziksel eforu durdur.",
+      "Rahat edebileceği bir pozisyonda tut.",
+      "Göğüs ağrısı, nefes darlığı ve bilinç durumunu yakından izle.",
+      "Ani kötüleşme, kollaps veya solunum bozulması olursa acil yaşam desteğine geç."
+    ],
+    "en": [
+      "Call emergency services.",
+      "Let the person rest and stop physical exertion.",
+      "Keep them in a comfortable position.",
+      "Monitor chest pain, breathing, and consciousness closely.",
+      "Move to emergency life support if there is sudden deterioration, collapse, or breathing failure."
+    ]
+  }
+}

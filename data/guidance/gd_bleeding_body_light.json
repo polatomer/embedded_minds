@@ -1,0 +1,23 @@
+{
+  "id": "gd_bleeding_body_light",
+  "title": {
+    "tr": "Vücutta hafif kanama yaklaşımı",
+    "en": "Light body bleeding response"
+  },
+  "severity": "urgent",
+  "animation_id": "bleeding_body_light_01",
+  "steps": {
+    "tr": [
+      "Temiz bir gazlı bez veya temiz bezle yarayı kapat.",
+      "Kanayan bölgeye dikkatli doğrudan bası uygula.",
+      "Kanamayı izle.",
+      "Kanama artarsa ağır kanama yaklaşımına geç."
+    ],
+    "en": [
+      "Cover the wound with clean gauze or clean cloth.",
+      "Apply careful direct pressure to the bleeding site.",
+      "Monitor the bleeding.",
+      "Move to the heavy bleeding response if bleeding increases."
+    ]
+  }
+}

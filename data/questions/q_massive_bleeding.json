@@ -1,0 +1,24 @@
+{
+  "id": "q_massive_bleeding",
+  "order": 3,
+  "text": {
+    "tr": "Görünür ve durdurulamayan bir kanama var mı?",
+    "en": "Is there visible, uncontrolled bleeding?"
+  },
+  "hint": {
+    "tr": "Kan akıyor veya fışkırıyor ve bez ya da giysiyle durdurulamıyorsa Evet seçin. Yalnızca küçük bir sıyrık veya hafif bir kesik varsa Hayır seçin.",
+    "en": "Select Yes if blood is flowing or spurting and cannot be stopped with a cloth. Select No for minor cuts or scrapes."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": {}
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": {}
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "q_abnormal_breathing",
+  "order": 2,
+  "text": {
+    "tr": "Nefes almıyor veya nefes alması çok zorlanmış mı?",
+    "en": "Is breathing absent or severely labored?"
+  },
+  "hint": {
+    "tr": "Kulağınızı yaklaştırın, nefes sesine bakın. Göğsünün inip kalktığını izleyin. 10 saniye bekleyin — hareket veya ses yoksa ya da nefes çok yüzeysel ve hırıltılıysa Evet seçin.",
+    "en": "Bring your ear close and listen. Watch the chest for 10 seconds — no movement, no sound, or very shallow/gurgling breathing means Yes."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_cardiac_arrest": 4, "dx_respiratory_failure": 4 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_cardiac_arrest": -2, "dx_respiratory_failure": -2 }
+    }
+  ]
+}

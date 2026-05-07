@@ -1,0 +1,23 @@
+{
+  "id": "gd_bleeding_arm_heavy",
+  "title": {
+    "tr": "Kolda ağır kanama yaklaşımı",
+    "en": "Heavy arm bleeding response"
+  },
+  "severity": "critical",
+  "animation_id": "bleeding_arm_heavy_01",
+  "steps": {
+    "tr": [
+      "112'yi ara veya arat.",
+      "Yaraya güçlü doğrudan bası uygula.",
+      "Kanama çok belirginse uzuv ağır kanama yaklaşımına geç.",
+      "Gerekirse turnike animasyonunu aç ve adımları izle."
+    ],
+    "en": [
+      "Call emergency services.",
+      "Apply strong direct pressure to the wound.",
+      "Move to severe limb bleeding management if bleeding is pronounced.",
+      "Open the tourniquet animation and follow the steps if needed."
+    ]
+  }
+}

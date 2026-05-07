@@ -1,0 +1,12 @@
+{
+  "id": "dx_cardiac_arrest",
+  "name": {
+    "tr": "Kardiyak arrest şüphesi",
+    "en": "Suspected cardiac arrest"
+  },
+  "min_score": 6,
+  "priority": 100,
+  "early_finish": true,
+  "screen_id": "cpr",
+  "protocol_id": "pt_cpr_adult_30_2"
+}

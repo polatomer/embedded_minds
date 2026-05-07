@@ -1,0 +1,24 @@
+{
+  "id": "q_skin_color",
+  "order": 10,
+  "text": {
+    "tr": "Hasta çok solgun, morumsu veya aşırı terlemiş mi?",
+    "en": "Is the patient very pale, bluish, or drenched in sweat?"
+  },
+  "hint": {
+    "tr": "Yüzüne ve dudaklarına bakın. Cilt balmumu gibi solgunsa, dudaklar veya tırnak dipleri mavimsi görünüyorsa ya da alnında soğuk ter damlaları varsa Evet seçin.",
+    "en": "Look at the face and lips. Select Yes if skin is waxy pale, lips or fingernails look bluish-purple, or there is cold sweat on the forehead."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_cardiac_arrest": 2, "dx_acute_cardiac_event": 1 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_cardiac_arrest": -1 }
+    }
+  ]
+}

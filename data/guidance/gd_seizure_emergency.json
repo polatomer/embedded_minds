@@ -1,0 +1,24 @@
+{
+  "id": "gd_seizure_emergency",
+  "title": {
+    "tr": "Nöbet acili yaklaşımı",
+    "en": "Seizure emergency response"
+  },
+  "severity": "critical",
+  "steps": {
+    "tr": [
+      "112'yi ara veya arat.",
+      "Kişiyi düşme ve çarpma riskinden koru.",
+      "Ağzına herhangi bir şey koyma ve hareketlerini zorla engellemeye çalışma.",
+      "Nöbet bitince hava yolunu ve solunumu yeniden değerlendir.",
+      "Bilinç açılmazsa veya solunum bozulursa acil yaşam desteği yaklaşımına geç."
+    ],
+    "en": [
+      "Call emergency services.",
+      "Protect the person from injury.",
+      "Do not put anything in the mouth and do not forcibly restrain movements.",
+      "Reassess airway and breathing when the seizure ends.",
+      "Move to emergency life support if consciousness does not return or breathing worsens."
+    ]
+  }
+}

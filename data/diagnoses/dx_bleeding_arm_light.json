@@ -1,0 +1,11 @@
+{
+  "id": "dx_bleeding_arm_light",
+  "name": {
+    "tr": "Kolda hafif kanama şüphesi",
+    "en": "Suspected light arm bleeding"
+  },
+  "min_score": 15,
+  "priority": 80,
+  "early_finish": true,
+  "guidance_id": "gd_bleeding_arm_light"
+}

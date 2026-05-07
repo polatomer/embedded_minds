@@ -1,0 +1,24 @@
+{
+  "id": "q_lip_tongue_swelling",
+  "order": 5,
+  "text": {
+    "tr": "Dudakları, dili veya boğazı şişmiş mi?",
+    "en": "Are the lips, tongue, or throat swollen?"
+  },
+  "hint": {
+    "tr": "Ağzını açmasını isteyin ya da yüzüne bakın. Dudaklar belirgin şekilde şişmişse veya dil ağzından taşıyorsa Evet seçin. Yutkunmakta zorlanıyorsa da Evet seçin.",
+    "en": "Ask them to open their mouth or look at their face. Select Yes if lips are visibly swollen, tongue is enlarged, or they have difficulty swallowing."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_anaphylaxis": 5, "dx_respiratory_failure": 1 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_anaphylaxis": -2 }
+    }
+  ]
+}

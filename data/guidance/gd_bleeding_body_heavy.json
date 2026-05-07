@@ -1,0 +1,23 @@
+{
+  "id": "gd_bleeding_body_heavy",
+  "title": {
+    "tr": "Vücutta ağır kanama yaklaşımı",
+    "en": "Heavy body bleeding response"
+  },
+  "severity": "critical",
+  "animation_id": "bleeding_body_heavy_01",
+  "steps": {
+    "tr": [
+      "112'yi ara veya arat.",
+      "Kanayan bölgeye mümkün olan en güçlü doğrudan basıyı uygula.",
+      "Basıyı sürdür ve kanamayı yeniden değerlendir.",
+      "Ani kötüleşme olursa acil yaşam desteğine hazırlan."
+    ],
+    "en": [
+      "Call emergency services.",
+      "Apply the strongest direct pressure possible to the bleeding site.",
+      "Maintain pressure and reassess the bleeding.",
+      "Prepare for emergency life support if the condition suddenly worsens."
+    ]
+  }
+}

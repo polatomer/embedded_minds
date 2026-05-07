@@ -1,0 +1,11 @@
+{
+  "id": "dx_respiratory_failure",
+  "name": {
+    "tr": "Solunum yetmezliği şüphesi",
+    "en": "Suspected respiratory failure"
+  },
+  "min_score": 6,
+  "priority": 90,
+  "early_finish": false,
+  "guidance_id": "gd_respiratory_failure"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "q_loss_of_consciousness",
+  "order": 1,
+  "text": {
+    "tr": "Hasta yanıt vermiyor mu?",
+    "en": "Is the patient unresponsive?"
+  },
+  "hint": {
+    "tr": "Yüksek sesle adını söyleyin veya omzuna sıkıca dokunun. Gözlerini açmıyor, konuşmuyor ve hareket etmiyorsa yanıt yok demektir.",
+    "en": "Call their name loudly or firmly tap their shoulder. If they don't open their eyes, speak, or move — select Yes."
+  },
+  "answers": [
+    {
+      "id": "yes",
+      "text": { "tr": "Evet", "en": "Yes" },
+      "scores": { "dx_cardiac_arrest": 3, "dx_respiratory_failure": 1, "dx_seizure_emergency": 2 }
+    },
+    {
+      "id": "no",
+      "text": { "tr": "Hayır", "en": "No" },
+      "scores": { "dx_cardiac_arrest": -1, "dx_seizure_emergency": -1 }
+    }
+  ]
+}
