@@ -1,527 +1,193 @@
-# AKS Linux Kurulum Dokümantasyonu
+# AKS — Akıllı Sağlık Çantası
 
-AKS, Linux tabanlı cihazlarda çalışacak şekilde geliştirilen Qt/CMake tabanlı bir uygulamadır.
-
-Bu proje, özellikle Raspberry Pi OS, Ubuntu ve Debian tabanlı Linux sistemlerde tek komutla kurulabilecek şekilde hazırlanmıştır.
-
-Amaç; yazılımın ticari cihazlarda manuel işlem gerektirmeden kurulması, bağımlılıklarının otomatik yüklenmesi, derlenmesi ve çalıştırılabilir hale getirilmesidir.
+Qt6/QML tabanlı, Raspberry Pi üzerinde çalışan dokunmatik ekran acil ilk yardım rehber sistemi.  
+MAX30102 nabız/SpO2 sensörü, gaz dedektörü ve sesli komut desteği içerir.
 
 ---
 
-## 1. Projenin Amacı
-
-Bu kurulum yapısı sayesinde AKS yazılımı herhangi bir Linux cihaza şu mantıkla kurulabilir:
+## Hızlı Kurulum
 
 ```bash
-git clone https://github.com/KULLANICI/AKS.git
-cd AKS
+git clone https://github.com/polatomer/embedded_minds.git
+cd embedded_minds
 sudo bash install.sh
 ```
 
-Kurulum tamamlandıktan sonra yazılım:
-
-```text
-/opt/AKS
-```
-
-dizinine kurulur.
-
-Kullanıcı veya teknisyen dosyaları elle taşımak zorunda kalmaz.
+Kurulum tamamlandıktan sonra uygulama `/opt/AKS` dizinine kurulur ve cihaz açılışında otomatik başlar.
 
 ---
 
-## 2. Desteklenen Sistemler
+## Desteklenen Sistemler
 
-Bu kurulum yapısı Debian tabanlı Linux dağıtımları için hazırlanmıştır.
+- Raspberry Pi OS (önerilen)
+- Ubuntu 22.04+
+- Debian 11+
 
-Test edilmesi hedeflenen sistemler:
-
-```text
-Raspberry Pi OS
-Ubuntu
-Debian
-Linux Mint
-```
-
-Not: Bu sistemlerde `apt` paket yöneticisi bulunmalıdır.
+> `apt` paket yöneticisi gereklidir.
 
 ---
 
-## 3. Proje Klasör Yapısı
+## Proje Yapısı
 
-Git deposundaki önerilen proje yapısı:
-
-```text
-AKS/
-├── CMakeLists.txt
-├── src/
-├── ui/
-├── data/
-├── install.sh
-├── dependencies-apt.txt
-├── .gitignore
+```
+embedded_minds/
+├── CMakeLists.txt          # CMake derleme dosyası
+├── install.sh              # Otomatik kurulum scripti
+├── voice_test.py           # Sesli komut servisi (Vosk tabanlı)
+├── src/                    # C++ kaynak kodları
+│   ├── main.cpp
+│   ├── app_bridge.h/cpp    # QML ↔ C++ köprüsü
+│   ├── voice_command_server.h/cpp  # Sesli komut Unix socket sunucusu
+│   ├── cpr_controller.h/cpp
+│   ├── bleeding_controller.h/cpp
+│   ├── vital_signs_service.h/cpp
+│   ├── max30102_sensor.h/cpp
+│   └── event_recorder.h/cpp
+├── ui/                     # QML arayüz dosyaları
+│   ├── main.qml
+│   ├── HomeScreen.qml
+│   ├── CPRGuidanceScreen.qml
+│   └── ...
+├── data/                   # Soru/tanı/yönlendirme JSON dosyaları
+│   ├── questions/
+│   ├── diagnoses/
+│   └── guidance/
 └── README.md
 ```
 
-Açıklamalar:
+---
 
-```text
-CMakeLists.txt          Projenin CMake derleme dosyası
-src/                    C++ kaynak kodları
-ui/                     QML arayüz dosyaları
-data/                   Varsayılan veri dosyaları
-install.sh              Otomatik kurulum scripti
-dependencies-apt.txt    Linux bağımlılık listesi
-.gitignore              Git'e gönderilmeyecek dosyalar
-README.md               Kurulum dokümantasyonu
+## Bağımlılıklar
+
+`install.sh` aşağıdaki paketleri otomatik kurar:
+
+**C++ / Qt:**
+```
+cmake, build-essential, pkg-config
+nlohmann-json3-dev, libgpiod-dev
+qt6-base-dev, qt6-declarative-dev, qt6-multimedia-dev, qt6-tools-dev
+libqt6network6-dev
+qml6-module-qtquick, qml6-module-qtquick-controls
+qml6-module-qtquick-layouts, qml6-module-qtmultimedia
+libgl1-mesa-dev, libpulse-dev, alsa-utils
+```
+
+**Python / Sesli Komut:**
+```
+python3, python3-pip, portaudio19-dev
+vosk, sounddevice, numpy
 ```
 
 ---
 
-## 4. Git'e Gönderilmemesi Gereken Dosyalar
+## Sesli Komut Kurulumu
 
-Aşağıdaki klasör ve dosyalar Git deposuna gönderilmemelidir:
-
-```text
-build/
-logs/
-*.log
-*.o
-*.user
-```
-
-Çünkü:
-
-- `build/` her cihazda yeniden oluşturulur.
-- `logs/` cihazdan cihaza değişir.
-- Derleme çıktıları Git deposunu gereksiz büyütür.
-
-Önerilen `.gitignore` içeriği:
-
-```gitignore
-build/
-logs/
-*.log
-*.o
-*.user
-.DS_Store
-```
-
----
-
-## 5. Kurulum Sonrası Sistem Klasörleri
-
-Kurulumdan sonra dosyalar Linux sisteminde şu dizinlere yerleştirilir:
-
-```text
-/opt/AKS          Ana yazılım dosyaları
-/etc/aks          Ayar dosyaları
-/var/lib/aks      Veri dosyaları
-/var/log/aks      Log dosyaları
-```
-
-Bu yapı ticari Linux uygulamaları için daha düzenlidir.
-
----
-
-## 6. Otomatik Kurulum
-
-Yeni bir cihazda kurulum yapmak için:
+Sesli komut için Vosk Türkçe modeli gereklidir (repo'ya dahil değildir, boyutu büyük olduğundan).
 
 ```bash
-git clone https://github.com/KULLANICI/AKS.git
-cd AKS
-sudo bash install.sh
+cd /opt/AKS
+wget https://alphacephei.com/vosk/models/vosk-model-small-tr-0.3.zip
+unzip vosk-model-small-tr-0.3.zip
+mv vosk-model-small-tr-0.3 model-tr
 ```
 
-Buradaki:
+Model kurulduktan sonra sesli komut servisi cihaz açılışında otomatik başlar.
 
-```text
-https://github.com/KULLANICI/AKS.git
-```
+**Desteklenen sesli komutlar** (`<komut> tamam` formatında söylenir):
 
-kısmı gerçek GitHub depo adresi ile değiştirilmelidir.
-
-Örnek:
-
-```bash
-git clone https://github.com/ahmetzeki/AKS.git
-cd AKS
-sudo bash install.sh
-```
+| Söylenen | İşlev |
+|---|---|
+| `evet tamam` | Evet / Onayla |
+| `hayır tamam` | Hayır / Reddet |
+| `geri tamam` | Geri git |
+| `ileri tamam` | İleri git |
+| `devam et tamam` | Devam et |
+| `ana sayfa tamam` | Ana sayfaya dön |
+| `acil durum tamam` | Acil değerlendirme başlat |
+| `ayarlar tamam` | Ayarlar ekranı |
+| `ambulans ara tamam` | 112'yi ara |
+| `türkçe tamam` | Dili Türkçe yap |
+| `ingilizce tamam` | Dili İngilizce yap |
+| `veritabanı tamam` | Kayıtlar ekranı |
+| `veri kaydını sil tamam` | Kayıtları sil |
 
 ---
 
-## 7. install.sh Ne Yapar?
-
-`install.sh` çalıştırıldığında sırasıyla şu işlemleri yapar:
-
-1. Scriptin `sudo` ile çalıştırılıp çalıştırılmadığını kontrol eder.
-2. Kurulumu yapan kullanıcıyı tespit eder.
-3. Gerekli Linux bağımlılıklarını yükler.
-4. `/opt/AKS` klasörünü oluşturur.
-5. `/etc/aks` klasörünü oluşturur.
-6. `/var/lib/aks` klasörünü oluşturur.
-7. `/var/log/aks` klasörünü oluşturur.
-8. Proje dosyalarını `/opt/AKS` altına kopyalar.
-9. `build/` klasörünü temizler.
-10. CMake ile yeniden derleme yapar.
-11. Çalıştırılabilir uygulama dosyasını bulur.
-12. `/opt/AKS/run.sh` dosyasını oluşturur.
-13. Masaüstüne `AKS.desktop` kısayolu ekler.
-14. Uygulama menüsüne AKS kısayolu ekler.
-15. Cihaz açıldığında otomatik başlatma ayarı oluşturur.
-16. Logları `/var/log/aks/aks.log` dosyasına yönlendirir.
-
----
-
-## 8. Bağımlılıkların Yüklenmesi
-
-Bağımlılıklar `dependencies-apt.txt` dosyasında tutulur.
-
-Bu dosyada kurulması gereken Linux paketleri satır satır yazılır.
-
-Örnek `dependencies-apt.txt` içeriği:
-
-```text
-git
-rsync
-cmake
-build-essential
-pkg-config
-qt6-base-dev
-qt6-declarative-dev
-qt6-multimedia-dev
-qt6-tools-dev
-qml6-module-qtquick
-qml6-module-qtquick-window
-qml6-module-qtquick-controls
-qml6-module-qtquick-layouts
-qml6-module-qtquick-templates
-qml6-module-qtmultimedia
-libgl1-mesa-dev
-xdg-utils
-desktop-file-utils
-```
-
-Kurulum sırasında `install.sh` şu komutu çalıştırır:
+## Manuel Derleme
 
 ```bash
-apt update
-xargs apt install -y < dependencies-apt.txt
-```
-
-Bu komut:
-
-1. Paket listesini günceller.
-2. `dependencies-apt.txt` içindeki paketleri okur.
-3. Eksik olan bağımlılıkları otomatik kurar.
-
----
-
-## 9. Bağımlılıkları Manuel Kurma
-
-Otomatik kurulum dışında bağımlılıkları manuel yüklemek için:
-
-```bash
-sudo apt update
-xargs sudo apt install -y < dependencies-apt.txt
-```
-
-Eğer `dependencies-apt.txt` dosyası yoksa paketler manuel olarak şöyle kurulabilir:
-
-```bash
-sudo apt update
-
-sudo apt install -y \
-    git \
-    rsync \
-    cmake \
-    build-essential \
-    pkg-config \
-    qt6-base-dev \
-    qt6-declarative-dev \
-    qt6-multimedia-dev \
-    qt6-tools-dev \
-    qml6-module-qtquick \
-    qml6-module-qtquick-window \
-    qml6-module-qtquick-controls \
-    qml6-module-qtquick-layouts \
-    qml6-module-qtquick-templates \
-    qml6-module-qtmultimedia \
-    libgl1-mesa-dev \
-    xdg-utils \
-    desktop-file-utils
-```
-
----
-
-## 10. Programı Elle Derleme
-
-Geliştirme ortamında programı elle derlemek için:
-
-```bash
-mkdir -p build
-cd build
-cmake ..
+mkdir -p build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
-```
-
-Derleme tamamlandıktan sonra çalıştırmak için:
-
-```bash
 ./AKS
 ```
 
-Not: Binary adı CMake hedef adına göre farklı olabilir.
-
 ---
 
-## 11. Kurulumdan Sonra Programı Çalıştırma
+## Kurulum Sonrası
 
-Kurulum tamamlandıktan sonra programı elle çalıştırmak için:
+| Dosya / Dizin | Açıklama |
+|---|---|
+| `/opt/AKS/` | Uygulama dosyaları |
+| `/opt/AKS/run.sh` | Uygulamayı başlatır |
+| `/opt/AKS/run_voice.sh` | Sesli komut servisini başlatır |
+| `/var/log/aks/aks.log` | Uygulama logları |
+| `/var/log/aks/voice.log` | Sesli komut logları |
+| `~/.config/autostart/` | Otomatik başlatma dosyaları |
 
+**Elle çalıştırmak için:**
 ```bash
-/opt/AKS/run.sh
+/opt/AKS/run.sh          # Uygulama
+/opt/AKS/run_voice.sh    # Sesli komut (ayrı terminal)
 ```
 
-Bu dosya uygulamayı başlatır ve logları şu dosyaya yazar:
-
-```text
-/var/log/aks/aks.log
-```
-
----
-
-## 12. Masaüstü Kısayolu
-
-Kurulumdan sonra masaüstünde şu kısayol oluşur:
-
-```text
-AKS.desktop
-```
-
-Bu kısayola çift tıklanarak yazılım başlatılabilir.
-
-Kısayolun çalıştırdığı dosya:
-
-```text
-/opt/AKS/run.sh
-```
-
----
-
-## 13. Uygulama Menüsü Kısayolu
-
-Kurulum scripti ayrıca şu dosyayı oluşturur:
-
-```text
-/usr/share/applications/AKS.desktop
-```
-
-Bu sayede AKS uygulaması Linux uygulama menüsünde de görünebilir.
-
----
-
-## 14. Otomatik Başlatma
-
-Kurulum scripti şu dosyayı oluşturur:
-
-```text
-~/.config/autostart/AKS.desktop
-```
-
-Bu dosya sayesinde cihaz açıldığında AKS otomatik olarak başlar.
-
-Otomatik başlatmayı kapatmak için bu dosya silinebilir:
-
-```bash
-rm ~/.config/autostart/AKS.desktop
-```
-
----
-
-## 15. Log Dosyaları
-
-Program logları şu dosyada tutulur:
-
-```text
-/var/log/aks/aks.log
-```
-
-Log dosyasını görüntülemek için:
-
-```bash
-cat /var/log/aks/aks.log
-```
-
-Canlı log takibi için:
-
+**Canlı log takibi:**
 ```bash
 tail -f /var/log/aks/aks.log
-```
-
-Log dosyasını temizlemek için:
-
-```bash
-sudo truncate -s 0 /var/log/aks/aks.log
+tail -f /var/log/aks/voice.log
 ```
 
 ---
 
-## 16. Güncelleme
-
-Yazılımı güncellemek için Git deposunun bulunduğu klasöre girilir:
+## Güncelleme
 
 ```bash
-cd AKS
+cd embedded_minds
 git pull
 sudo bash install.sh
 ```
 
-Bu işlem:
-
-1. Git üzerinden güncel kodları çeker.
-2. Dosyaları tekrar `/opt/AKS` altına kopyalar.
-3. Projeyi yeniden derler.
-4. Çalıştırma ve kısayol dosyalarını tekrar oluşturur.
-
 ---
 
-## 17. Kurulumu Kontrol Etme
+## Sık Karşılaşılan Hatalar
 
-Kurulumdan sonra dosyaları kontrol etmek için:
-
+**`nlohmann_json` bulunamadı:**
 ```bash
-ls /opt/AKS
+sudo apt install nlohmann-json3-dev
 ```
 
-Çalıştırma dosyasını kontrol etmek için:
-
+**`gpiod` bulunamadı:**
 ```bash
-ls -l /opt/AKS/run.sh
+sudo apt install libgpiod-dev
 ```
 
-Log klasörünü kontrol etmek için:
-
+**`Qt6::Network` bulunamadı:**
 ```bash
-ls /var/log/aks
+sudo apt install libqt6network6-dev
 ```
 
-Masaüstü kısayolunu kontrol etmek için:
-
+**QML modülü bulunamadı:**
 ```bash
-ls ~/Desktop/AKS.desktop
+sudo apt install qml6-module-qtquick qml6-module-qtquick-controls \
+                 qml6-module-qtquick-layouts qml6-module-qtmultimedia
 ```
 
-veya Türkçe sistemlerde:
+**`model-tr` bulunamadı (sesli komut çalışmıyor):**  
+Yukarıdaki "Sesli Komut Kurulumu" adımlarını takip et.
 
+**Ekran açılmıyor (`xcb` hatası):**
 ```bash
-ls ~/Masaüstü/AKS.desktop
-```
-
----
-
-## 18. Olası Hatalar
-
-### Hata: sudo ile çalıştırılmalı
-
-Çözüm:
-
-```bash
-sudo bash install.sh
-```
-
----
-
-### Hata: CMake bulunamadı
-
-Çözüm:
-
-```bash
-sudo apt update
-sudo apt install -y cmake
-```
-
----
-
-### Hata: Qt modülü bulunamadı
-
-Çözüm:
-
-```bash
-sudo apt install -y qt6-base-dev qt6-declarative-dev qt6-multimedia-dev
-```
-
-QML modülleri için:
-
-```bash
-sudo apt install -y \
-    qml6-module-qtquick \
-    qml6-module-qtquick-controls \
-    qml6-module-qtquick-layouts \
-    qml6-module-qtmultimedia
-```
-
----
-
-### Hata: Çalıştırılabilir dosya bulunamadı
-
-Bu durumda CMake hedef adı kontrol edilmelidir.
-
-`CMakeLists.txt` içinde şuna benzer bir hedef bulunmalıdır:
-
-```cmake
-add_executable(AKS ...)
-```
-
-Eğer hedef adı farklıysa `install.sh` içindeki şu değişken güncellenmelidir:
-
-```bash
-APP_BINARY="AKS"
-```
-
----
-
-## 19. Ticari Ürün Kurulum Mantığı
-
-Bu yapı ticari cihazlarda şu avantajları sağlar:
-
-1. Her cihaz aynı şekilde kurulur.
-2. Dosyalar standart Linux dizinlerine yerleşir.
-3. Bağımlılıklar otomatik kurulur.
-4. Yazılım cihaz üzerinde derlenir.
-5. Masaüstü kısayolu otomatik oluşur.
-6. Cihaz açılışında yazılım otomatik başlar.
-7. Loglar merkezi bir yerde tutulur.
-8. Güncelleme süreci kolaylaşır.
-
----
-
-## 20. Temel Kurulum Özeti
-
-Yeni cihazda yapılacak işlem:
-
-```bash
-git clone https://github.com/KULLANICI/AKS.git
-cd AKS
-sudo bash install.sh
-```
-
-Kurulumdan sonra çalıştırma:
-
-```bash
+export DISPLAY=:0
+export QT_QPA_PLATFORM=xcb
 /opt/AKS/run.sh
-```
-
-Log kontrolü:
-
-```bash
-tail -f /var/log/aks/aks.log
-```
-
-Ana kurulum dizini:
-
-```text
-/opt/AKS
 ```
