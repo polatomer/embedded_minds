@@ -9,7 +9,6 @@ DATA_DIR="/var/lib/aks"
 LOG_DIR="/var/log/aks"
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# ── Root kontrolü ─────────────────────────────────────────────────────────────
 if [ "$EUID" -ne 0 ]; then
     echo "Hata: Kurulum sudo ile çalıştırılmalı."
     echo "Kullanım: sudo bash install.sh"
@@ -26,7 +25,6 @@ echo " Kaynak    : $SRC_DIR"
 echo " Hedef     : $INSTALL_DIR"
 echo "=================================================="
 
-# ── C++/Qt bağımlılıkları ─────────────────────────────────────────────────────
 echo ""
 echo "[1/7] C++ ve Qt bağımlılıkları kuruluyor..."
 apt-get update -qq
@@ -43,7 +41,6 @@ apt-get install -y \
     qt6-declarative-dev \
     qt6-multimedia-dev \
     qt6-tools-dev \
-    libqt6network6-dev \
     qml6-module-qtquick \
     qml6-module-qtquick-window \
     qml6-module-qtquick-controls \
@@ -54,10 +51,8 @@ apt-get install -y \
     libpulse-dev \
     alsa-utils
 
-# ── Python ses tanıma bağımlılıkları ─────────────────────────────────────────
 echo ""
 echo "[2/7] Python ve Vosk bağımlılıkları kuruluyor..."
-
 apt-get install -y \
     python3 \
     python3-pip \
@@ -65,20 +60,13 @@ apt-get install -y \
     portaudio19-dev \
     libsndfile1
 
-pip3 install --break-system-packages \
-    vosk \
-    sounddevice \
-    numpy
+pip3 install --break-system-packages vosk sounddevice numpy 2>/dev/null || \
+pip3 install vosk sounddevice numpy
 
-# ── Klasörler ─────────────────────────────────────────────────────────────────
 echo ""
 echo "[3/7] Klasörler oluşturuluyor..."
-mkdir -p "$INSTALL_DIR"
-mkdir -p "$CONFIG_DIR"
-mkdir -p "$DATA_DIR"
-mkdir -p "$LOG_DIR"
+mkdir -p "$INSTALL_DIR" "$CONFIG_DIR" "$DATA_DIR" "$LOG_DIR"
 
-# ── Dosya kopyalama ───────────────────────────────────────────────────────────
 echo ""
 echo "[4/7] Dosyalar $INSTALL_DIR altına kopyalanıyor..."
 rsync -a --delete \
@@ -90,14 +78,10 @@ rsync -a --delete \
     --exclude "*.user" \
     "$SRC_DIR/" "$INSTALL_DIR/"
 
-# ── Yetkilendirme ─────────────────────────────────────────────────────────────
-chown -R "$INSTALL_USER:$INSTALL_USER" "$INSTALL_DIR"
-chown -R "$INSTALL_USER:$INSTALL_USER" "$DATA_DIR"
-chown -R "$INSTALL_USER:$INSTALL_USER" "$LOG_DIR"
+chown -R "$INSTALL_USER:$INSTALL_USER" "$INSTALL_DIR" "$DATA_DIR" "$LOG_DIR"
 
-# ── Derleme ───────────────────────────────────────────────────────────────────
 echo ""
-echo "[5/7] Proje derleniyor (bu biraz sürebilir)..."
+echo "[5/7] Proje derleniyor..."
 cd "$INSTALL_DIR"
 rm -rf build
 mkdir -p build
@@ -105,25 +89,19 @@ cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j"$(nproc)"
 
-# Binary'i bul
 REAL_BINARY="$INSTALL_DIR/build/$APP_BINARY"
 if [ ! -x "$REAL_BINARY" ]; then
     FOUND_BINARY="$(find "$INSTALL_DIR/build" -maxdepth 1 -type f -executable | head -n 1 || true)"
     if [ -z "$FOUND_BINARY" ]; then
-        echo ""
         echo "Hata: Çalıştırılabilir dosya bulunamadı."
-        echo "CMakeLists.txt içindeki add_executable hedef adını kontrol et."
         exit 1
     fi
     REAL_BINARY="$FOUND_BINARY"
 fi
-
 echo "Binary: $REAL_BINARY"
 
-# ── run.sh ────────────────────────────────────────────────────────────────────
 echo ""
 echo "[6/7] Başlatma dosyaları oluşturuluyor..."
-
 cat > "$INSTALL_DIR/run.sh" <<RUNEOF
 #!/usr/bin/env bash
 set -e
@@ -135,14 +113,9 @@ RUNEOF
 chmod +x "$INSTALL_DIR/run.sh"
 chown "$INSTALL_USER:$INSTALL_USER" "$INSTALL_DIR/run.sh"
 
-# ── Ses tanıma başlatma scripti ───────────────────────────────────────────────
-# voice_test.py ve model-tr klasörünün $INSTALL_DIR içinde olmasını bekler.
-# Yoksa bu kısım sessizce atlanır.
 if [ -f "$INSTALL_DIR/voice_test.py" ]; then
     cat > "$INSTALL_DIR/run_voice.sh" <<VOICEEOF
 #!/usr/bin/env bash
-# AKS sesli komut servisi
-# Gereksinim: $INSTALL_DIR/model-tr klasörü mevcut olmalı
 cd "$INSTALL_DIR"
 if [ ! -d "model-tr" ]; then
     echo "Hata: model-tr klasörü bulunamadı: $INSTALL_DIR/model-tr"
@@ -152,13 +125,12 @@ python3 "$INSTALL_DIR/voice_test.py" >> "$LOG_DIR/voice.log" 2>&1
 VOICEEOF
     chmod +x "$INSTALL_DIR/run_voice.sh"
     chown "$INSTALL_USER:$INSTALL_USER" "$INSTALL_DIR/run_voice.sh"
-    echo "Sesli komut scripti oluşturuldu: $INSTALL_DIR/run_voice.sh"
 fi
 
-# ── Otomatik başlatma (LXDE / GNOME / KDE) ───────────────────────────────────
+echo ""
+echo "[7/7] Otomatik başlatma ayarlanıyor..."
 mkdir -p "$USER_HOME/.config/autostart"
 
-# AKS uygulaması
 cat > "$USER_HOME/.config/autostart/aks.desktop" <<DESKTOPEOF
 [Desktop Entry]
 Type=Application
@@ -168,7 +140,6 @@ Terminal=false
 X-GNOME-Autostart-enabled=true
 DESKTOPEOF
 
-# Sesli komut servisi (model-tr varsa)
 if [ -f "$INSTALL_DIR/run_voice.sh" ] && [ -d "$INSTALL_DIR/model-tr" ]; then
     cat > "$USER_HOME/.config/autostart/aks-voice.desktop" <<VOICEDESKTOPEOF
 [Desktop Entry]
@@ -178,43 +149,37 @@ Exec=bash -c "sleep 5 && $INSTALL_DIR/run_voice.sh"
 Terminal=false
 X-GNOME-Autostart-enabled=true
 VOICEDESKTOPEOF
-    echo "Sesli komut otomatik başlatma eklendi (5 sn gecikme ile)."
 fi
 
 chown -R "$INSTALL_USER:$INSTALL_USER" "$USER_HOME/.config/autostart"
 
-# ── Masaüstü kısayolu ─────────────────────────────────────────────────────────
-DESKTOP_DIR="$USER_HOME/Desktop"
-if [ ! -d "$DESKTOP_DIR" ]; then
-    DESKTOP_DIR="$USER_HOME/Masaüstü"
-fi
-if [ -d "$DESKTOP_DIR" ]; then
-    cat > "$DESKTOP_DIR/AKS.desktop" <<SHORTCUTEOF
+for DESKTOP_DIR in "$USER_HOME/Desktop" "$USER_HOME/Masaüstü"; do
+    if [ -d "$DESKTOP_DIR" ]; then
+        cat > "$DESKTOP_DIR/AKS.desktop" <<SHORTCUTEOF
 [Desktop Entry]
 Type=Application
 Name=AKS - Akıllı Sağlık Çantası
 Exec=$INSTALL_DIR/run.sh
 Terminal=false
 SHORTCUTEOF
-    chmod +x "$DESKTOP_DIR/AKS.desktop"
-    chown "$INSTALL_USER:$INSTALL_USER" "$DESKTOP_DIR/AKS.desktop"
-fi
+        chmod +x "$DESKTOP_DIR/AKS.desktop"
+        chown "$INSTALL_USER:$INSTALL_USER" "$DESKTOP_DIR/AKS.desktop"
+    fi
+done
 
-# ── Özet ─────────────────────────────────────────────────────────────────────
 echo ""
 echo "=================================================="
 echo " Kurulum Tamamlandı"
 echo "=================================================="
+echo " Çalıştırmak için:  $INSTALL_DIR/run.sh"
+echo " Loglar:            $LOG_DIR/aks.log"
+if [ -f "$INSTALL_DIR/run_voice.sh" ]; then
 echo ""
-echo " AKS başlatmak için:"
-echo "   $INSTALL_DIR/run.sh"
-echo ""
-echo " Sesli komut başlatmak için (ayrı terminal):"
-echo "   $INSTALL_DIR/run_voice.sh"
-echo ""
-echo " Loglar:"
-echo "   $LOG_DIR/aks.log"
-echo "   $LOG_DIR/voice.log"
-echo ""
-echo " Cihaz yeniden başlatıldığında her ikisi otomatik açılır."
+echo " Sesli komut:       $INSTALL_DIR/run_voice.sh"
+echo " NOT: model-tr klasörü gerekli:"
+echo "   cd $INSTALL_DIR"
+echo "   wget https://alphacephei.com/vosk/models/vosk-model-small-tr-0.3.zip"
+echo "   unzip vosk-model-small-tr-0.3.zip"
+echo "   mv vosk-model-small-tr-0.3 model-tr"
+fi
 echo "=================================================="
