@@ -1,13 +1,6 @@
 build/
-model-tr/
-model-tr-large/
+logs/
 *.log
 *.o
 *.user
 .DS_Store
-__pycache__/
-*.pyc
-*.zip
-test.wav
-run.sh
-run_voice.sh

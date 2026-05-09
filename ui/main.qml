@@ -463,39 +463,6 @@ ApplicationWindow {
 
 
     // ── Sesli komut bildirimi (banner) ───────────────────────────────────────
-    Rectangle {
-        id: voiceBanner
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: 10
-        width: voiceBannerText.implicitWidth + 36
-        height: 40
-        radius: 10
-        color: "#CC1E3A5F"
-        visible: false
-        z: 999
-
-        Text {
-            id: voiceBannerText
-            anchors.centerIn: parent
-            color: "#FFFFFF"
-            font.pixelSize: 15
-            font.bold: true
-        }
-
-        Timer {
-            id: voiceBannerTimer
-            interval: 1800
-            onTriggered: voiceBanner.visible = false
-        }
-    }
-
-    function showVoiceBanner(text) {
-        voiceBannerText.text = "🎤 " + text
-        voiceBanner.visible = true
-        voiceBannerTimer.restart()
-    }
-
     StackLayout {
         anchors.fill: parent
         currentIndex: window.screenIndex(appBridge.screen)
