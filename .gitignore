@@ -1,0 +1,9 @@
+build/
+*.o
+*.log
+*.user
+.DS_Store
+__pycache__/
+*.pyc
+*.zip
+model-tr/
